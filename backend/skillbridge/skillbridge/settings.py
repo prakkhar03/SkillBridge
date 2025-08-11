@@ -37,7 +37,25 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "rest_framework",
+    "accounts",  
+    'rest_framework_simplejwt.token_blacklist',
 ]
+AUTH_USER_MODEL = 'accounts.User'
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    )
+}
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  
+DEFAULT_FROM_EMAIL = 'no-reply@skillbridge.com'
+FRONTEND_URL = 'http://localhost:3000'
+
+
+DEBUG = True
+ALLOWED_HOSTS = []
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -121,3 +139,4 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+APPEND_SLASH = False
