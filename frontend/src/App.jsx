@@ -1,4 +1,7 @@
 import { useState } from 'react'
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
+import HomePage from './pages/HomePage'
+import AuthPage from './pages/AuthPage'
 
 const colors = {
   background: '#DFE0E2',
@@ -16,12 +19,12 @@ function Navbar() {
     >
       <div className="flex items-center justify-between px-4 py-3 sm:px-6">
         {/* Left: Logo + Name */}
-        <div className="flex items-center gap-3">
+        <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
           <img src="/src/assets/skillbridgelogo.png" alt="SkillBridge logo" className="h-9 w-9 rounded-md object-cover" />
           <span className="text-lg font-bold tracking-wide" style={{ color: colors.accent }}>
             SkillBridge
           </span>
-        </div>
+        </Link>
 
         {/* Right: Hamburger */}
         <button
@@ -89,12 +92,13 @@ function Navbar() {
               >
                 Contact
               </a>
-              <a
-                href="#auth"
-                className="text-3xl md:text-4xl font-semibold text-[#FFFFFF] underline-anim"
+              <Link
+                to="/auth"
+                className="text-3xl md:text-4xl font-semibold text-[#FFFFFF] underline-anim hover:text-blue-200 transition-colors"
+                onClick={() => setOpen(false)}
               >
-                Sign in
-              </a>
+                Sign up
+              </Link>
             </nav>
           </div>
         </div>
@@ -105,8 +109,14 @@ function Navbar() {
 
 export default function App() {
   return (
-    <div className="min-h-screen" style={{ backgroundColor: colors.background }}>
-      <Navbar />
-    </div>
+    <Router>
+      <div className="min-h-screen" style={{ backgroundColor: colors.background }}>
+        <Navbar />
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/auth" element={<AuthPage />} />
+        </Routes>
+      </div>
+    </Router>
   )
 }
