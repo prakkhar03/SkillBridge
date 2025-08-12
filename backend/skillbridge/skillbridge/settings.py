@@ -41,9 +41,20 @@ INSTALLED_APPS = [
     "accounts",  
     'rest_framework_simplejwt.token_blacklist',
     "verification",
+    "corsheaders",  # For handling CORS
 ]
 AUTH_USER_MODEL = 'accounts.User'
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",  # React frontend
+    "http://localhost:8000", 
+]
+CORS_ALLOW_ALL_ORIGINS = True 
 
+CORS_ALLOW_HEADERS = [
+    "content-type",
+    "authorization",
+]
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
@@ -59,6 +70,7 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -135,6 +147,17 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 STATIC_URL = "static/"
+
+# Media files (uploaded files)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+# Gemini API Configuration
+GEMINI_API_KEY = "your_gemini_api_key_here"  # Set this in your environment variables
+
+# File upload settings
+FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
