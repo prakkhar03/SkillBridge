@@ -122,4 +122,4 @@ We welcome contributions! Please fork the repo, create a branch, and submit a pu
 
 ## License
 
-# This project is open-source and licensed under the MIT License.
+This project is open-source and licensed under the MIT License.
