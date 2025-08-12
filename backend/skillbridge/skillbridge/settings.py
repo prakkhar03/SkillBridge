@@ -164,3 +164,6 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 APPEND_SLASH = False
+import os
+from dotenv import load_dotenv
+gemini_key= os.getenv("GEMINI_API_KEY")

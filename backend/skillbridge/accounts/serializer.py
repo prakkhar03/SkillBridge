@@ -80,7 +80,9 @@ class UserDataSerializer(serializers.ModelSerializer):
                 "experience_level": profile.experience_level,
                 "portfolio_links": profile.portfolio_links,
                 "verification_tag": profile.verification_tag,
-                "star_rating": profile.star_rating
+                "star_rating": profile.star_rating,
+                "github_url": profile.github_url,
+                "resume": profile.resume.url if profile.resume else None
             }
         except Profile.DoesNotExist:
             return None
@@ -95,7 +97,9 @@ class ProfileSerializer(serializers.ModelSerializer):
             "bio",
             "skills",
             "experience_level",
-            "portfolio_links"
+            "portfolio_links",
+            "github_url",
+            "resume"
         ]
         extra_kwargs = {
             "full_name": {"required": False, "allow_blank": True},
@@ -104,6 +108,8 @@ class ProfileSerializer(serializers.ModelSerializer):
             "skills": {"required": False, "allow_blank": True},
             "experience_level": {"required": False, "allow_blank": True},
             "portfolio_links": {"required": False, "allow_blank": True},
+            "github_url": {"required": False, "allow_blank": True},
+            "resume": {"required": False, "allow_null": True}
         }
 
     def update(self, instance, validated_data):

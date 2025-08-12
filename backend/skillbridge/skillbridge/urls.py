@@ -16,7 +16,9 @@ Including another URLconf
 """
 
 from django.contrib import admin
-from django.urls import path,include
+from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
 from accounts import urls as accounts_urls
 from verification import urls as verification_urls
 
@@ -25,3 +27,7 @@ urlpatterns = [
     path("api/accounts/", include(accounts_urls)),
     path("api/verification/", include(verification_urls)),
 ]
+
+# Serve media files during development
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

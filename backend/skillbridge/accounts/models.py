@@ -61,9 +61,11 @@ class Profile(models.Model):
     skills = models.TextField(blank=True)
     experience_level = models.CharField(max_length=50, blank=True)
     portfolio_links = models.TextField(blank=True)
+    github_url = models.URLField(blank=True, null=True)
+    resume = models.FileField(upload_to="resumes/", blank=True, null=True)  # PDF/DOCX 
 
     verification_tag = models.CharField(max_length=20, choices=TAG_CHOICES, default="Unverified")
-    star_rating = models.DecimalField(max_digits=2, decimal_places=1, default=0.0)  # 0.0 to 5.0 stars
+    star_rating = models.DecimalField(max_digits=2, decimal_places=1, default=0.0)  
 
     def __str__(self):
         return f"{self.user.email} Profile"
