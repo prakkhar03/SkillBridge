@@ -11,4 +11,30 @@
     padding: 0;
     box-sizing: border-box;
   }
+  html, body, #root {
+    height: 100%;
+    background-color: #DFE0E2;
+  }
+  body {
+    font-family: 'Poppins', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  }
+}
+
+/* Smooth underline animation for nav links */
+.underline-anim {
+  position: relative;
+  display: inline-block;
+}
+.underline-anim::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -4px;
+  height: 2px;
+  width: 0;
+  background-color: currentColor;
+  transition: width 280ms ease;
+}
+.underline-anim:hover::after {
+  width: 100%;
 }
