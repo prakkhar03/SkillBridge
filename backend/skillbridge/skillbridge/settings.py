@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "accounts",  
     'rest_framework_simplejwt.token_blacklist',
+    "verification",
 ]
 AUTH_USER_MODEL = 'accounts.User'
 
