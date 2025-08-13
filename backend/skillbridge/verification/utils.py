@@ -121,3 +121,72 @@ def generate_gemini_recommendation(resume_analysis, github_analysis, skills=None
     except Exception as e:
         return {"error": str(e)}
     
+
+#------------test generation logic------------------    
+def generate_tests_based_on_profile(resume_analysis, github_analysis, skills=None, recommendation=None, num_questions=5):
+    """
+    Generates personalized test questions for ANY freelance role based on:
+    - Resume analysis
+    - GitHub analysis
+    - Skills list
+    - Gemini recommendation JSON (optional)
+    
+    Output: A structured JSON with questions, type, and difficulty.
+    """
+
+    role_hint = "freelance professional"  # default generic
+    if skills:
+        role_hint = f"freelancer specializing in {', '.join(skills)}"
+    if recommendation and isinstance(recommendation, dict):
+        if "recommended_tags" in recommendation:
+            role_hint = f"{', '.join(recommendation['recommended_tags'])} professional"
+
+    prompt = f"""
+    You are an expert interviewer creating evaluation tasks for freelancers.
+    Based on the following candidate data, generate {num_questions} role-specific questions or tasks:
+
+    Resume Analysis:
+    {resume_analysis}
+
+    GitHub Analysis:
+    {github_analysis}
+
+    Skills:
+    {skills or "Not provided"}
+
+    Recommended Role:
+    {role_hint}
+
+    Instructions:
+    - Make the questions practical, scenario-based, and relevant to the candidate's freelance role.
+    - Cover a mix of theoretical and hands-on tasks.
+    - Vary difficulty: Easy, Medium, Hard.
+    - Examples of possible roles: Graphic Designer, Content Writer, Web Developer, Digital Marketer, Data Analyst, etc.
+    - Use creative, real-world scenarios to test practical skills.
+    - Return ONLY valid JSON in this format:
+    {{
+        "role": "{role_hint}",
+        "questions": [
+            {{
+                "question": "string",
+                "type": "theory/practical/task",
+                "difficulty": "Easy/Medium/Hard"
+            }}
+        ]
+    }}
+    """
+
+    try:
+        model = genai.GenerativeModel("gemini-1.5-flash")
+        response = model.generate_content(prompt)
+        raw_text = response.text.strip()
+
+        import re, json
+        match = re.search(r"\{.*\}", raw_text, re.DOTALL)
+        if match:
+            raw_text = match.group(0)
+
+        return json.loads(raw_text)
+
+    except Exception as e:
+        return {"error": f"Error generating tests: {str(e)}"}
