@@ -2,7 +2,8 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path("start/", views.start_verification, name="start_verification"),
-    path("status/", views.verification_status, name="verification_status"),
-    path("admin-verify/<int:user_id>/", views.admin_verify_user, name="admin_verify_user"),
+    path("start/", views.StartVerificationView.as_view(), name="start_verification"),
+    path("status/", views.VerificationStatusView.as_view(), name="verification_status"),
+    path("admin-verify/<int:user_id>/", views.AdminVerifyUserView.as_view(), name="admin_verify_user"),
+    path("recommendation/", views.UserRecommendationView.as_view(), name="user_recommendation"),
 ]

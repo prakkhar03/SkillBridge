@@ -1,4 +1,4 @@
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework import status
@@ -18,86 +18,90 @@ from .utils import (
 User = get_user_model()
 
 
-@api_view(["POST"])
-@permission_classes([IsAuthenticated])
-def start_verification(request):
-    # Get profile
-    profile = get_object_or_404(Profile, user=request.user)
+class StartVerificationView(APIView):
+    permission_classes = [IsAuthenticated]
 
-    # Require at least one source
-    if not profile.resume and not profile.github_url:
-        return Response(
-            {"error": "Resume or GitHub URL is required"},
-            status=status.HTTP_400_BAD_REQUEST
+    def post(self, request):
+        profile = get_object_or_404(Profile, user=request.user)
+
+        if not profile.resume and not profile.github_url:
+            return Response(
+                {"error": "Resume or GitHub URL is required"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        verification = SkillVerification.objects.filter(user=request.user).order_by('-created_at').first()
+
+        if verification:
+            verification.verification_status = "PENDING"
+        else:
+            verification = SkillVerification(user=request.user, verification_status="PENDING")
+
+        resume_analysis = extract_and_analyze_resume(profile.resume) if profile.resume else None
+        github_analysis = analyze_github_with_gemini(profile.github_url) if profile.github_url else None
+
+        recommendation = generate_gemini_recommendation(
+            resume_analysis or "",
+            github_analysis or "",
+            profile.skills
         )
 
-    # Always create a new record (allow multiple verifications)
-    verification = SkillVerification.objects.create(
-        user=request.user,
-        verification_status="PENDING"
-    )
+        verification.resume_analysis = resume_analysis or ""
+        verification.github_analysis = github_analysis or ""
+        verification.gemini_recommendation = recommendation
+        verification.save()
 
-    # Analyze resume (if available)
-    resume_analysis = None
-    if profile.resume:
-        resume_analysis = extract_and_analyze_resume(profile.resume)
-
-    # Analyze GitHub (if available)
-    github_analysis = None
-    if profile.github_url:
-        github_analysis = analyze_github_with_gemini(profile.github_url)
-
-    # Generate recommendation
-    recommendation = generate_gemini_recommendation(
-        resume_analysis or "",
-        github_analysis or "",
-        profile.skills
-    )
-
-    verification.resume_analysis = resume_analysis or ""
-    verification.github_analysis = github_analysis or ""
-    verification.gemini_recommendation = recommendation
-    verification.verification_status = "PENDING"
-    verification.save()
-
-    return Response({"message": "Verification started", "id": verification.id}, status=status.HTTP_200_OK)
+        return Response({"message": "Verification started/updated", "id": verification.id}, status=status.HTTP_200_OK)
 
 
-@api_view(["GET"])
-@permission_classes([IsAuthenticated])
-def verification_status(request):
-    """Get the latest verification for the logged-in user."""
-    verification = SkillVerification.objects.filter(user=request.user).order_by('-created_at').first()
-    if not verification:
-        return Response({"error": "No verification found"}, status=status.HTTP_404_NOT_FOUND)
-    
-    serializer = VerificationStatusSerializer(verification)
-    return Response(serializer.data)
+class VerificationStatusView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        verification = SkillVerification.objects.filter(user=request.user).order_by('-created_at').first()
+        if not verification:
+            return Response({"error": "No verification found"}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = VerificationStatusSerializer(verification)
+        return Response(serializer.data)
 
 
-@api_view(["POST"])
-@permission_classes([IsAdminUser])
-def admin_verify_user(request, user_id):
-    """Admin sets star rating & tags, marks latest verification as VERIFIED."""
-    serializer = AdminVerifySerializer(data=request.data)
-    serializer.is_valid(raise_exception=True)
+class AdminVerifyUserView(APIView):
+    permission_classes = [IsAdminUser]
 
-    target_user = get_object_or_404(User, id=user_id)
-    profile = get_object_or_404(Profile, user=target_user)
-    verification = SkillVerification.objects.filter(user=target_user).order_by('-created_at').first()
+    def post(self, request, user_id):
+        serializer = AdminVerifySerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
 
-    if not verification:
-        return Response({"error": "No verification found for this user"}, status=status.HTTP_404_NOT_FOUND)
+        target_user = get_object_or_404(User, id=user_id)
+        profile = get_object_or_404(Profile, user=target_user)
+        verification = SkillVerification.objects.filter(user=target_user).order_by('-created_at').first()
 
-    profile.star_rating = serializer.validated_data["star_rating"]
-    profile.verification_tag = serializer.validated_data["tags"]
-    profile.save()
+        if not verification:
+            return Response({"error": "No verification found for this user"}, status=status.HTTP_404_NOT_FOUND)
 
-    verification.verification_status = "VERIFIED"
-    verification.save()
+        profile.star_rating = serializer.validated_data["star_rating"]
+        profile.verification_tag = serializer.validated_data["tags"]
+        profile.save()
 
-    return Response({
-        "message": f"User {target_user.email} verified successfully",
-        "star_rating": profile.star_rating,
-        "verification_tag": profile.verification_tag
-    })
+        verification.verification_status = "VERIFIED"
+        verification.save()
+
+        return Response({
+            "message": f"User {target_user.email} verified successfully",
+            "star_rating": profile.star_rating,
+            "verification_tag": profile.verification_tag
+        })
+
+
+class UserRecommendationView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        profile = get_object_or_404(Profile, user=request.user)
+        verification = SkillVerification.objects.filter(user=request.user).order_by('-created_at').first()
+
+        if not verification or not verification.gemini_recommendation:
+            return Response({"error": "No recommendation available"}, status=status.HTTP_404_NOT_FOUND)
+
+        return Response(verification.gemini_recommendation, status=status.HTTP_200_OK)

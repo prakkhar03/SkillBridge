@@ -1,5 +1,5 @@
 import os
-import PyPDF2
+import PyPDF2 # pyright: ignore[reportMissingImports]
 from dotenv import load_dotenv
 import google.generativeai as genai
 
@@ -120,3 +120,4 @@ def generate_gemini_recommendation(resume_analysis, github_analysis, skills=None
 
     except Exception as e:
         return {"error": str(e)}
+    
