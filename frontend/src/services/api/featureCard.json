@@ -1,0 +1,26 @@
+[
+  {
+    "id": 1,
+    "icon": "target",
+    "title": "SkillDecay Intelligence",
+    "description": "Future-proof your career by tracking the real-time market relevance of your skills."
+  },
+  {
+    "id": 2,
+    "icon": "bot", 
+    "title": "AI Project Scope Analyzer",
+    "description": "Instantly assess requirement complexity for smarter scoping and fewer disputes."
+  },
+  {
+    "id": 3,
+    "icon": "trophy",
+    "title": "Universal Reputation System",
+    "description": "Own your reputation. Import and verify ratings from any platform in one place."
+  },
+  {
+    "id": 4,
+    "icon": "stats",
+    "title": "Predictive Success Scoring",
+    "description": "AI-powered compatibility matching based on proven patterns of project success."
+  }
+]

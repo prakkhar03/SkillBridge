@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
 import HomePage from './pages/HomePage'
 import AuthPage from './pages/AuthPage'
+import { Footer } from './ui/Footer'
 
 const colors = {
   background: '#DFE0E2',
@@ -116,6 +117,7 @@ export default function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/auth" element={<AuthPage />} />
         </Routes>
+        <Footer />
       </div>
     </Router>
   )
