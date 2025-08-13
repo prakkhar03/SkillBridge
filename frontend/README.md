@@ -34,6 +34,7 @@ A React-based frontend application for the SkillBridge platform, built with Vite
 ```bash
 cd frontend
 npm install
+npm install react-icons
 ```
 
 ### Development
