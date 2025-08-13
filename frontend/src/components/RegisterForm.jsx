@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import { authAPI } from '../services/api';
 
 const colors = {
@@ -7,7 +9,9 @@ const colors = {
   accent: '#787A84',
 };
 
-export default function RegisterForm({ onSuccess, onSwitchToLogin }) {
+export default function RegisterForm({ onSwitchToLogin }) {
+  const navigate = useNavigate();
+  const { login } = useAuth();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -98,9 +102,10 @@ export default function RegisterForm({ onSuccess, onSwitchToLogin }) {
         localStorage.setItem('refresh_token', refresh);
       }
 
-      // Call success callback after a delay
+      // Update auth context and redirect to dashboard
+      login(response.data?.user || { email: formData.email, role: formData.role });
       setTimeout(() => {
-        if (onSuccess) onSuccess(response.data);
+        navigate('/dashboard');
       }, 2000);
 
     } catch (error) {

@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import { authAPI } from '../services/api';
 
 const colors = {
@@ -7,7 +9,9 @@ const colors = {
   accent: '#787A84',
 };
 
-export default function LoginForm({ onSuccess, onSwitchToRegister }) {
+export default function LoginForm({ onSwitchToRegister }) {
+  const navigate = useNavigate();
+  const { login } = useAuth();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -73,16 +77,17 @@ export default function LoginForm({ onSuccess, onSwitchToRegister }) {
         text: response.message || 'Login successful!'
       });
 
-      // Store tokens
+      // Store tokens and update auth context
       if (response.data?.tokens) {
         const { access, refresh } = response.data.tokens;
         localStorage.setItem('access_token', access);
         localStorage.setItem('refresh_token', refresh);
       }
 
-      // Call success callback after a delay
+      // Update auth context and redirect to dashboard
+      login(response.data?.user || { email: formData.email });
       setTimeout(() => {
-        if (onSuccess) onSuccess(response.data);
+        navigate('/dashboard');
       }, 1500);
 
     } catch (error) {

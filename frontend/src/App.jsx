@@ -1,7 +1,12 @@
 import { useState } from 'react'
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom'
+import { useAuth } from './context/AuthContext'
 import HomePage from './pages/HomePage'
 import AuthPage from './pages/AuthPage'
+import FreelancerDashboard from './pages/FreelancerDashboard'
+import ProfileEditPage from './pages/ProfileEditPage'
+import ProfileViewPage from './pages/ProfileViewPage'
+import ProtectedRoute from './components/ProtectedRoute'
 import { Footer } from './ui/Footer'
 
 const colors = {
@@ -12,6 +17,7 @@ const colors = {
 
 function Navbar() {
   const [open, setOpen] = useState(false)
+  const { isAuthenticated, logout } = useAuth()
 
   return (
     <nav
@@ -28,21 +34,38 @@ function Navbar() {
         </Link>
 
         {/* Right: Hamburger */}
-        <button
-          aria-label="Toggle menu"
-          className="inline-flex h-10 w-10 items-center justify-center rounded-md transition-colors focus:outline-none focus:ring-2"
-          style={{ border: `1px solid ${colors.muted}`, color: colors.accent }}
-          onClick={() => setOpen((p) => !p)}
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="currentColor"
-            className="h-5 w-5"
-          >
-            <path d="M3.75 6.75h16.5a.75.75 0 0 0 0-1.5H3.75a.75.75 0 0 0 0 1.5Zm16.5 5.25H3.75a.75.75 0 0 0 0 1.5h16.5a.75.75 0 0 0 0-1.5Zm0 6H3.75a.75.75 0 0 0 0 1.5h16.5a.75.75 0 0 0 0-1.5Z" />
-          </svg>
-        </button>
+                                {isAuthenticated ? (
+                          <div className="flex items-center space-x-3">
+                            <Link
+                              to="/dashboard"
+                              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                            >
+                              Dashboard
+                            </Link>
+                            <button
+                              onClick={logout}
+                              className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium"
+                            >
+                              Logout
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            aria-label="Toggle menu"
+                            className="inline-flex h-10 w-10 items-center justify-center rounded-md transition-colors focus:outline-none focus:ring-2"
+                            style={{ border: `1px solid ${colors.muted}`, color: colors.accent }}
+                            onClick={() => setOpen((p) => !p)}
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              viewBox="0 0 24 24"
+                              fill="currentColor"
+                              className="h-5 w-5"
+                            >
+                              <path d="M3.75 6.75h16.5a.75.75 0 0 0 0-1.5H3.75a.75.75 0 0 0 0 1.5Zm16.5 5.25H3.75a.75.75 0 0 0 0 1.5h16.5a.75.75 0 0 0 0-1.5Zm0 6H3.75a.75.75 0 0 0 0 1.5h16.5a.75.75 0 0 0 0-1.5Z" />
+                            </svg>
+                          </button>
+                        )}
       </div>
 
       {/* Full-screen overlay menu */}
@@ -93,13 +116,34 @@ function Navbar() {
               >
                 Contact
               </a>
-              <Link
-                to="/auth"
-                className="text-3xl md:text-4xl font-semibold text-[#FFFFFF] underline-anim hover:text-blue-200 transition-colors"
-                onClick={() => setOpen(false)}
-              >
-                Sign up
-              </Link>
+                                        {isAuthenticated ? (
+                            <>
+                              <Link
+                                to="/dashboard"
+                                className="text-3xl md:text-4xl font-semibold text-[#FFFFFF] underline-anim hover:text-blue-200 transition-colors"
+                                onClick={() => setOpen(false)}
+                              >
+                                Dashboard
+                              </Link>
+                              <button
+                                onClick={() => {
+                                  logout();
+                                  setOpen(false);
+                                }}
+                                className="text-3xl md:text-4xl font-semibold text-[#FFFFFF] underline-anim hover:text-red-200 transition-colors text-left"
+                              >
+                                Logout
+                              </button>
+                            </>
+                          ) : (
+                            <Link
+                              to="/auth"
+                              className="text-3xl md:text-4xl font-semibold text-[#FFFFFF] underline-anim hover:text-blue-200 transition-colors"
+                              onClick={() => setOpen(false)}
+                            >
+                              Sign up
+                            </Link>
+                          )}
             </nav>
           </div>
         </div>
@@ -116,6 +160,21 @@ export default function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/auth" element={<AuthPage />} />
+          <Route path="/dashboard" element={
+            <ProtectedRoute>
+              <FreelancerDashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="/profile/edit" element={
+            <ProtectedRoute>
+              <ProfileEditPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/profile/view" element={
+            <ProtectedRoute>
+              <ProfileViewPage />
+            </ProtectedRoute>
+          } />
         </Routes>
         <Footer />
       </div>

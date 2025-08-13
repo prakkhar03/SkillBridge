@@ -89,12 +89,10 @@ export default function AuthPage() {
         <div className="transition-all duration-300 ease-in-out">
           {isLogin ? (
             <LoginForm 
-              onSuccess={handleAuthSuccess}
               onSwitchToRegister={switchToRegister}
             />
           ) : (
             <RegisterForm 
-              onSuccess={handleAuthSuccess}
               onSwitchToLogin={switchToLogin}
             />
           )}
