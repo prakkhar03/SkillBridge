@@ -143,7 +143,7 @@ def generate_tests_based_on_profile(resume_analysis, github_analysis, skills=Non
 
     prompt = f"""
     You are an expert interviewer creating evaluation tasks for freelancers.
-    Based on the following candidate data, generate {num_questions} role-specific questions or tasks:
+    Based on the following candidate data, generate {num_questions} role-specific questions or tasks all questions should be multiple choice question with 4 options and return answer key at the end of the question list.:
 
     Resume Analysis:
     {resume_analysis}

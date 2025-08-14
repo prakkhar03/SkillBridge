@@ -27,4 +27,4 @@ requests==2.31.0
 rsa==4.9.1
 sqlparse==0.5.3
 tqdm==4.67.1
-typing_extension
+typing_extensions

@@ -12,7 +12,8 @@ from .utils import (
     extract_text_from_pdf_fileobj,
     extract_and_analyze_resume,
     analyze_github_with_gemini,
-    generate_gemini_recommendation
+    generate_gemini_recommendation,
+    generate_tests_based_on_profile
 )
 
 User = get_user_model()
@@ -105,3 +106,27 @@ class UserRecommendationView(APIView):
             return Response({"error": "No recommendation available"}, status=status.HTTP_404_NOT_FOUND)
 
         return Response(verification.gemini_recommendation, status=status.HTTP_200_OK)
+
+class TestView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request):
+        profile = get_object_or_404(Profile, user=request.user)
+        verification = SkillVerification.objects.filter(user=request.user).order_by('-created_at').first()
+
+        if not verification:
+            return Response({"error": "No verification found"}, status=status.HTTP_404_NOT_FOUND)
+        
+        resume_analysis = verification.resume_analysis
+        github_analysis = verification.github_analysis
+        skills = profile.skills
+        recommendation = verification.gemini_recommendation
+        
+        test_questions = generate_tests_based_on_profile(
+            resume_analysis=resume_analysis,
+            github_analysis=github_analysis,
+            skills=skills,
+            recommendation=recommendation
+        )
+        return Response(test_questions, status=status.HTTP_200_OK)
+

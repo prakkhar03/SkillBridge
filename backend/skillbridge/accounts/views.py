@@ -212,3 +212,13 @@ class ProfileUpdateView(APIView):
             )
 
         return Response({"errors": serializer.errors}, status=400)
+
+class EmailVerifcationstatusView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        """
+        Check if the user's email is verified.
+        """
+        user = request.user
+        return Response({"email_verified": user.verified}, status=200)
