@@ -10,7 +10,6 @@ from django.core.validators import EmailValidator
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.core.cache import cache
 import logging
-
 from accounts.utils import send_verification_email, get_tokens_for_user, send_login_alert_email
 from .serializer import RegisterSerializer, LoginSerializer, UserDataSerializer,ProfileSerializer
 from accounts.models import User
