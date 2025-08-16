@@ -123,18 +123,15 @@ def generate_gemini_recommendation(resume_analysis, github_analysis, skills=None
     
 
 #------------test generation logic------------------    
-def generate_tests_based_on_profile(resume_analysis, github_analysis, skills=None, recommendation=None, num_questions=5):
+def generate_tests_based_on_profile(
+    resume_analysis, github_analysis, skills=None, recommendation=None, num_questions=5
+):
     """
-    Generates personalized test questions for ANY freelance role based on:
-    - Resume analysis
-    - GitHub analysis
-    - Skills list
-    - Gemini recommendation JSON (optional)
-    
-    Output: A structured JSON with questions, type, and difficulty.
+    Generates personalized test questions for ANY freelance role.
+    Returns both questions and correct answers.
     """
 
-    role_hint = "freelance professional"  # default generic
+    role_hint = "freelance professional"
     if skills:
         role_hint = f"freelancer specializing in {', '.join(skills)}"
     if recommendation and isinstance(recommendation, dict):
@@ -143,7 +140,8 @@ def generate_tests_based_on_profile(resume_analysis, github_analysis, skills=Non
 
     prompt = f"""
     You are an expert interviewer creating evaluation tasks for freelancers.
-    Based on the following candidate data, generate {num_questions} role-specific questions or tasks all questions should be multiple choice question with 4 options and return answer key at the end of the question list.:
+    Based on the following candidate data, generate {num_questions} role-specific multiple choice questions with exactly 4 options each.
+    Include the correct answer for each question.
 
     Resume Analysis:
     {resume_analysis}
@@ -159,20 +157,20 @@ def generate_tests_based_on_profile(resume_analysis, github_analysis, skills=Non
 
     Instructions:
     - Make the questions practical, scenario-based, and relevant to the candidate's freelance role.
-    - Cover a mix of theoretical and hands-on tasks.
     - Vary difficulty: Easy, Medium, Hard.
-    - Examples of possible roles: Graphic Designer, Content Writer, Web Developer, Digital Marketer, Data Analyst, etc.
-    - Use creative, real-world scenarios to test practical skills.
     - Return ONLY valid JSON in this format:
     {{
         "role": "{role_hint}",
         "questions": [
             {{
                 "question": "string",
+                "options": ["A", "B", "C", "D"],
                 "type": "theory/practical/task",
-                "difficulty": "Easy/Medium/Hard"
+                "difficulty": "Easy/Medium/Hard",
+                "correct_answer": "B"
             }}
-        ]
+        ],
+        "answers": ["B", "A", "D", "C", "B"]
     }}
     """
 

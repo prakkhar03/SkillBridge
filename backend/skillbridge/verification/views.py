@@ -5,7 +5,7 @@ from rest_framework import status
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
 
-from .models import SkillVerification
+from .models import SkillVerification,SkillTest
 from .serializer import VerificationStatusSerializer, AdminVerifySerializer
 from accounts.models import Profile
 from .utils import (
@@ -111,22 +111,57 @@ class TestView(APIView):
     permission_classes = [IsAuthenticated]
     
     def post(self, request):
+        """Generate a test, store it with correct answers, and return questions only."""
         profile = get_object_or_404(Profile, user=request.user)
         verification = SkillVerification.objects.filter(user=request.user).order_by('-created_at').first()
 
         if not verification:
             return Response({"error": "No verification found"}, status=status.HTTP_404_NOT_FOUND)
         
-        resume_analysis = verification.resume_analysis
-        github_analysis = verification.github_analysis
-        skills = profile.skills
-        recommendation = verification.gemini_recommendation
-        
-        test_questions = generate_tests_based_on_profile(
-            resume_analysis=resume_analysis,
-            github_analysis=github_analysis,
-            skills=skills,
-            recommendation=recommendation
+        test_data = generate_tests_based_on_profile(
+            resume_analysis=verification.resume_analysis,
+            github_analysis=verification.github_analysis,
+            skills=profile.skills,
+            recommendation=verification.gemini_recommendation
         )
-        return Response(test_questions, status=status.HTTP_200_OK)
 
+        if "questions" not in test_data or "answers" not in test_data:
+            return Response({"error": "Invalid test data from generator"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+       
+        skill_test = SkillTest.objects.create(
+            user=request.user,
+            questions=test_data["questions"],
+            answers=test_data["answers"]
+        )
+
+        return Response({
+            "message": "Test generated successfully",
+            "test_id": skill_test.id,
+            "role": test_data.get("role", ""),
+            "questions": test_data["questions"]
+        }, status=status.HTTP_200_OK)
+
+
+class SubmitTestView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, test_id):
+        """Submit answers and get scored result."""
+        skill_test = get_object_or_404(SkillTest, id=test_id, user=request.user)
+        user_answers = request.data.get("answers")
+
+        if not isinstance(user_answers, list):
+            return Response({"error": "Answers must be a list"}, status=status.HTTP_400_BAD_REQUEST)
+
+        correct_answers = skill_test.answers
+        score = sum(1 for i, ans in enumerate(user_answers) if i < len(correct_answers) and ans == correct_answers[i])
+        total = len(correct_answers)
+        percentage = (score / total) * 100 if total > 0 else 0
+
+        return Response({
+            "score": score,
+            "total": total,
+            "percentage": percentage,
+            "result": "PASS" if percentage >= 60 else "FAIL"
+        }, status=status.HTTP_200_OK)

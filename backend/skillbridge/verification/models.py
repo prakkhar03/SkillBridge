@@ -28,3 +28,18 @@ class SkillVerification(models.Model):
 
     def __str__(self):
         return f"Verification({self.user.email}) - {self.verification_status}"
+    
+class SkillTest(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="skill_tests"
+    )
+    questions = models.JSONField()
+    answers = models.JSONField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return f"SkillTest({self.user.email}) - {self.created_at.strftime('%Y-%m-%d %H:%M:%S')}"
+    
