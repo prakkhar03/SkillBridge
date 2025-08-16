@@ -32,7 +32,8 @@ class VerificationStatusSerializer(serializers.ModelSerializer):
 
 
 class AdminVerifySerializer(serializers.Serializer):
-    star_rating = serializers.DecimalField(
-        max_digits=2, decimal_places=1, min_value=1.0, max_value=5.0
+    star_rating = serializers.DecimalField(max_digits=2, decimal_places=1, required=False)
+    tags = serializers.ChoiceField(
+        choices=["Unverified", "Beginner", "Intermediate", "Expert"],
+        required=False
     )
-    tags = serializers.ChoiceField(choices=Profile.TAG_CHOICES)

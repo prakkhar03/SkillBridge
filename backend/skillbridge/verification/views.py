@@ -5,7 +5,7 @@ from rest_framework import status
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
 
-from .models import SkillVerification,SkillTest
+from .models import SkillVerification,SkillTest,TestResult
 from .serializer import VerificationStatusSerializer, AdminVerifySerializer
 from accounts.models import Profile
 from .utils import (
@@ -13,7 +13,8 @@ from .utils import (
     extract_and_analyze_resume,
     analyze_github_with_gemini,
     generate_gemini_recommendation,
-    generate_tests_based_on_profile
+    generate_tests_based_on_profile,
+    final_analysis_with_gemini
 )
 
 User = get_user_model()
@@ -143,11 +144,11 @@ class TestView(APIView):
         }, status=status.HTTP_200_OK)
 
 
+
 class SubmitTestView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, test_id):
-        """Submit answers and get scored result."""
         skill_test = get_object_or_404(SkillTest, id=test_id, user=request.user)
         user_answers = request.data.get("answers")
 
@@ -158,10 +159,42 @@ class SubmitTestView(APIView):
         score = sum(1 for i, ans in enumerate(user_answers) if i < len(correct_answers) and ans == correct_answers[i])
         total = len(correct_answers)
         percentage = (score / total) * 100 if total > 0 else 0
+        result = "PASS" if percentage >= 60 else "FAIL"
+
+        # Save test result
+        TestResult.objects.create(
+            user=request.user,
+            test=skill_test,
+            score=score,
+            total=total,
+            percentage=percentage,
+            result=result
+        )
+
+        # Update verification status to PENDING after test
+        verification = SkillVerification.objects.filter(user=request.user).order_by('-created_at').first()
+        if verification:
+            # Run final analysis
+            combined_analysis = final_analysis_with_gemini(
+                resume_analysis=verification.resume_analysis,
+                github_analysis=verification.github_analysis,
+                previous_recommendation=verification.gemini_recommendation,
+                test_score=percentage,
+                test_result=result
+            )
+            verification.gemini_recommendation = combined_analysis
+            verification.verification_status = "PENDING"  # ✅ mark for admin review
+            verification.save()
+
+        # Reset profile tag to Unverified until admin approval
+        profile = Profile.objects.filter(user=request.user).first()
+        if profile:
+            profile.verification_tag = "Unverified"
+            profile.save()
 
         return Response({
             "score": score,
             "total": total,
             "percentage": percentage,
-            "result": "PASS" if percentage >= 60 else "FAIL"
+            "result": result
         }, status=status.HTTP_200_OK)

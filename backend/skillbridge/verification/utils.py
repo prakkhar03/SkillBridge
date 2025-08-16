@@ -188,3 +188,44 @@ def generate_tests_based_on_profile(
 
     except Exception as e:
         return {"error": f"Error generating tests: {str(e)}"}
+
+
+def final_analysis_with_gemini(resume_analysis, github_analysis, previous_recommendation, test_score, test_result):
+    prompt = f"""
+    You are an expert evaluator.
+    Here is the candidate's previous analysis and recommendation:
+
+    Resume Analysis:
+    {resume_analysis}
+
+    GitHub Analysis:
+    {github_analysis}
+
+    Previous Recommendation:
+    {previous_recommendation}
+
+    Test Performance:
+    Score: {test_score}%
+    Result: {test_result}
+
+    Provide a final JSON analysis with:
+    {{
+        "star_rating": float (1–5),
+        "strengths": [list of strings],
+        "weaknesses": [list of strings],
+        "recommended_tags": ["Beginner", "Intermediate", or "Expert"]
+    }}
+    Only return JSON, no extra text.
+    """
+
+    try:
+        model = genai.GenerativeModel("gemini-1.5-flash")
+        response = model.generate_content(prompt)
+        import re, json
+        raw_text = response.text.strip()
+        match = re.search(r"\{.*\}", raw_text, re.DOTALL)
+        if match:
+            raw_text = match.group(0)
+        return json.loads(raw_text)
+    except Exception as e:
+        return {"error": str(e)}

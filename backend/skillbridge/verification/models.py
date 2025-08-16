@@ -43,3 +43,20 @@ class SkillTest(models.Model):
     def __str__(self):
         return f"SkillTest({self.user.email}) - {self.created_at.strftime('%Y-%m-%d %H:%M:%S')}"
     
+
+class TestResult(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="test_results"
+    )
+    test = models.ForeignKey(SkillTest, on_delete=models.CASCADE, related_name="results")
+    score = models.IntegerField()
+    total = models.IntegerField()
+    percentage = models.FloatField()
+    result = models.CharField(max_length=10)  # PASS/FAIL
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"TestResult({self.user.email}) - {self.result} ({self.percentage}%)"
+

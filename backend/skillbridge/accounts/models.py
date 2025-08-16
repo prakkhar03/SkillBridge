@@ -13,9 +13,21 @@ class UserManager(BaseUserManager):
         return user
 
     def create_superuser(self, email, password=None, **extra_fields):
+        """
+        Create a superuser (admin) with full permissions
+        and skip email verification.
+        """
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
+        extra_fields.setdefault("verified", True)  
+        extra_fields.setdefault("role", "admin")   
+        if extra_fields.get("is_staff") is not True:
+            raise ValueError("Superuser must have is_staff=True.")
+        if extra_fields.get("is_superuser") is not True:
+            raise ValueError("Superuser must have is_superuser=True.")
+
         return self.create_user(email, password, **extra_fields)
+
 
 
 
@@ -23,6 +35,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     ROLE_CHOICES = (
         ("freelancer", "Freelancer"),
         ("client", "Client"),
+        ("admin", "Admin"),
     )
 
     email = models.EmailField(unique=True)
