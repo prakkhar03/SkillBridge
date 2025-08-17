@@ -80,7 +80,7 @@ export const HeroSection = ({ children }) => {
   return (
     <section
       ref={containerRef}
-      className="h-screen w-full bg-black flex flex-col justify-center items-center text-center text-white p-4 overflow-hidden relative"
+      className="h-screen w-full flex flex-col justify-center items-center text-center text-white p-4 overflow-hidden relative"
     >
       <div className="absolute top-0 left-0 w-full z-20">
         {children}

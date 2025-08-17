@@ -15,7 +15,7 @@ export function Navbar() {
   return (
     <nav
       className="w-full max-w-7xl mx-auto mt-4 md:mt-6 rounded-xl shadow-sm"
-      style={{ backgroundColor: "black", border: `1px solid white` }}
+      style={{ border: `1px solid white` }}
     >
       <div className="flex items-center justify-between px-4 py-3 sm:px-6">
         {/* Left: Logo + Name */}

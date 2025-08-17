@@ -53,7 +53,7 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="min-h-screen py-8" style={{ backgroundColor: colors.background }}>
+    <div className="min-h-screen py-8">
       <div className="w-full max-w-md mx-auto px-4">
         {/* Back to Home Link */}
         <div className="mb-6">

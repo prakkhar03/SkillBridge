@@ -1,9 +1,8 @@
 import { HeroSection } from "../ui/landingPage/HeroSection";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { DetailSection } from "../ui/landingPage/DetailSection";
-import { FeaturesSection } from "../ui/landingPage/FeatureSection";
 import { Navbar } from "../ui/landingPage/NavBar";
+import StorySection from "../ui/landingPage/StorySection";
 gsap.registerPlugin(ScrollTrigger);
 
 export default function HomePage() {
@@ -16,9 +15,7 @@ export default function HomePage() {
       <HeroSection>
         <Navbar />
       </HeroSection>
-  
-      <DetailSection />
-      <FeaturesSection />
+      <StorySection />
     </div>
   );
 }
