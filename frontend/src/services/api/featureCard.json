@@ -22,5 +22,17 @@
     "icon": "stats",
     "title": "Predictive Success Scoring",
     "description": "AI-powered compatibility matching based on proven patterns of project success."
+  },
+  {
+    "id": 5,
+    "icon": "stats",
+    "title": "Predictive Success Scoring",
+    "description": "AI-powered compatibility matching based on proven patterns of project success."
+  },
+  {
+    "id": 6,
+    "icon": "stats",
+    "title": "Predictive Success Scoring",
+    "description": "AI-powered compatibility matching based on proven patterns of project success."
   }
 ]
