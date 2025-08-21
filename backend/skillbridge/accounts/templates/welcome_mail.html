@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <title>Confirm Your Email - SkillBridge</title>
+    <title>Welcome Onboard - SkillBridge</title>
     <meta http-equiv="x-ua-compatible" content="IE=edge">
     <meta http-equiv="content-type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -21,13 +21,17 @@
         overflow: hidden;
         box-shadow: 0 2px 8px rgba(0,0,0,0.06);
       }
-
       .content {
         text-align: center;
         padding: 35px 25px;
       }
+      .content img {
+        width: 280px;
+        max-width: 90%;
+        margin-bottom: 25px;
+      }
       .content h1 {
-        font-size: 24px;
+        font-size: 26px;
         color: #2B2A35;
         margin-bottom: 15px;
       }
@@ -65,12 +69,12 @@
     <div class="container">
       <!-- Content -->
       <div class="content">
-        <img src="./imgs/emailverify.png" alt="SkillBridge Logo" style="width: 300px; margin-bottom: 20px;">
-        <h1>Confirm Your Email Address</h1>
-        <p>Welcome to <strong>SkillBridge</strong>! Let’s make sure this email is really yours.</p>
-        <p>Click the button below to confirm your email and unlock access to verified opportunities and resources.</p>
-        <a href="{{verification_link}}" class="btn">Confirm Email</a>
-        <p style="font-size: 13px; color: #939DA8; margin-top: 20px;">If you didn’t sign up for SkillBridge, you can safely ignore this email.</p>
+        <img src="./imgs/welcomemail.png" alt="Welcome Illustration">
+        <h1>Your Email is Verified! 🎉</h1>
+        <p>Welcome aboard, <strong>{{user_name}}</strong>! You’re now officially part of the <strong>SkillBridge</strong> community.</p>
+        <p>Start exploring courses, build your profile, and unlock opportunities that match your skills.</p>
+        <a href="{{dashboard_link}}" class="btn">Go to Dashboard</a>
+        <p style="font-size: 13px; color: #939DA8; margin-top: 20px;">Need help? Our team is just an email away at <a href="mailto:support@skillbridge.com">support@skillbridge.com</a>.</p>
       </div>
       <!-- Footer -->
       <div class="footer">
