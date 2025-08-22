@@ -11,9 +11,11 @@ from django.core.exceptions import ValidationError as DjangoValidationError
 from django.core.cache import cache
 import logging
 from accounts.utils import send_verification_email, get_tokens_for_user, send_login_alert_email
-from .serializer import RegisterSerializer, LoginSerializer, UserDataSerializer,ProfileSerializer
-from accounts.models import User
-
+from .serializer import RegisterSerializer, LoginSerializer, UserDataSerializer,ProfileSerializer,ClientCompanySerializer,ClientDocumentSerializer,ClientContactSerializer
+from rest_framework import viewsets, permissions
+from rest_framework.response import Response
+from rest_framework.decorators import action
+from .models import ClientCompany, ClientDocument, ClientContact,User
 logger = logging.getLogger(__name__)
 
 ATTEMPT_LIMIT = 3
@@ -221,3 +223,63 @@ class EmailVerifcationstatusView(APIView):
         """
         user = request.user
         return Response({"email_verified": user.verified}, status=200)
+
+
+class IsClientUser(permissions.BasePermission):
+    """Allow access only to users with role=client"""
+    def has_permission(self, request, view):
+        return request.user.is_authenticated and request.user.role == "client"
+
+
+class ClientCompanyViewSet(viewsets.ModelViewSet):
+    serializer_class = ClientCompanySerializer
+    permission_classes = [permissions.IsAuthenticated, IsClientUser]
+
+    def get_queryset(self):
+        return ClientCompany.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        company = serializer.save(user=self.request.user)
+
+        # Auto move to stage 1 when company info is created
+        if company.onboarding_stage == 0:
+            company.onboarding_stage = 1
+            company.save()
+
+            # sync with user onboarding stage
+            company.user.onboarding_stage = 1
+            company.user.save(update_fields=["onboarding_stage"])
+
+
+class ClientDocumentViewSet(viewsets.ModelViewSet):
+    serializer_class = ClientDocumentSerializer
+    permission_classes = [permissions.IsAuthenticated, IsClientUser]
+
+    def get_queryset(self):
+        return ClientDocument.objects.filter(client_company__user=self.request.user)
+
+    def perform_create(self, serializer):
+        company = ClientCompany.objects.get(user=self.request.user)
+        serializer.save(client_company=company)
+
+        # Auto move to stage 2 when first document is uploaded
+        if company.onboarding_stage < 2:
+            company.onboarding_stage = 2
+            company.save()
+
+            # sync with user onboarding stage
+            company.user.onboarding_stage = 2
+            company.user.save(update_fields=["onboarding_stage"])
+
+
+class ClientContactViewSet(viewsets.ModelViewSet):
+    serializer_class = ClientContactSerializer
+    permission_classes = [permissions.IsAuthenticated, IsClientUser]
+
+    def get_queryset(self):
+        return ClientContact.objects.filter(client_company__user=self.request.user)
+
+    def perform_create(self, serializer):
+        company = ClientCompany.objects.get(user=self.request.user)
+        serializer.save(client_company=company)
+        

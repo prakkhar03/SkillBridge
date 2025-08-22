@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import authenticate, get_user_model
-from .models import Profile
+from .models import *
 from django.contrib.auth.hashers import check_password
 
 User = get_user_model()
@@ -118,3 +118,24 @@ class ProfileSerializer(serializers.ModelSerializer):
             setattr(instance, attr, value)
         instance.save()
         return instance
+
+
+class ClientCompanySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ClientCompany
+        fields = "__all__"
+        read_only_fields = ("id", "created_at", "updated_at", "onboarding_stage", "user")
+
+
+class ClientDocumentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ClientDocument
+        fields = ["id", "document_type", "file", "verified", "uploaded_at"]
+        read_only_fields = ("id", "uploaded_at", "verified")
+
+
+class ClientContactSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ClientContact
+        fields = ["id", "full_name", "email", "phone", "designation"]
+        read_only_fields = ("id",)

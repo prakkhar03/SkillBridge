@@ -1,8 +1,9 @@
-from django.urls import path
+from django.urls import path,include
 from .views import (
     RegisterView, VerifyEmailView, LoginView,
-    LogoutView, ProfileView,ProfileUpdateView,EmailVerifcationstatusView
+    LogoutView, ProfileView,ProfileUpdateView,EmailVerifcationstatusView,ClientCompanyViewSet, ClientDocumentViewSet, ClientContactViewSet
 )
+from rest_framework.routers import DefaultRouter
 
 urlpatterns = [
     path("register/", RegisterView.as_view(), name="register"),
@@ -12,4 +13,13 @@ urlpatterns = [
     path("profile/", ProfileView.as_view(), name="profile"),
     path("profile/update/", ProfileUpdateView.as_view(), name="profile-update"),
     path("profile/verification-status/", EmailVerifcationstatusView.as_view(), name="email-verification-status"),
+]
+
+router = DefaultRouter()
+router.register("companies", ClientCompanyViewSet, basename="client-company")
+router.register("documents", ClientDocumentViewSet, basename="client-document")
+router.register("contacts", ClientContactViewSet, basename="client-contact")
+
+urlpatterns += [
+    path("client/", include(router.urls)),
 ]
