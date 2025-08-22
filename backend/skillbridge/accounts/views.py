@@ -283,3 +283,20 @@ class ClientContactViewSet(viewsets.ModelViewSet):
         company = ClientCompany.objects.get(user=self.request.user)
         serializer.save(client_company=company)
         
+class ProfileByIdView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = ProfileSerializer
+    def get(self, request, user_id):
+        """
+        Return the profile details of a user by their ID.
+        """
+        try:
+            user = User.objects.get(id=user_id)
+            profile = user.profile
+            serializer = self.serializer_class(profile)
+            return Response({"data": serializer.data})
+        except User.DoesNotExist:
+            return Response({"message": "User not found"}, status=404)
+        except Exception as e:
+            logger.error(f"Error fetching profile by ID: {str(e)}")
+            return Response({"message": "Error fetching profile", "error": str(e)}, status=500)

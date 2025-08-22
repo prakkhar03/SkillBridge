@@ -99,7 +99,9 @@ class ProfileSerializer(serializers.ModelSerializer):
             "experience_level",
             "portfolio_links",
             "github_url",
-            "resume"
+            "resume",
+            "star_rating",
+            "verification_tag"
         ]
         extra_kwargs = {
             "full_name": {"required": False, "allow_blank": True},
@@ -109,7 +111,9 @@ class ProfileSerializer(serializers.ModelSerializer):
             "experience_level": {"required": False, "allow_blank": True},
             "portfolio_links": {"required": False, "allow_blank": True},
             "github_url": {"required": False, "allow_blank": True},
-            "resume": {"required": False, "allow_null": True}
+            "resume": {"required": False, "allow_null": True},
+            "star_rating": {"read_only": True},
+            "verification_tag": {"read_only": True},
         }
 
     def update(self, instance, validated_data):

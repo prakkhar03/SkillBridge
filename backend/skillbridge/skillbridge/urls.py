@@ -21,11 +21,13 @@ from django.conf import settings
 from django.conf.urls.static import static
 from accounts import urls as accounts_urls
 from verification import urls as verification_urls
+from project import urls as project_urls
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/accounts/", include(accounts_urls)),
     path("api/verification/", include(verification_urls)),
+    path("api/projects/", include(project_urls)),
 ]
 
 # Serve media files during development
