@@ -91,9 +91,24 @@ export default function LoginForm({ onSwitchToRegister }) {
       }, 1500);
 
     } catch (error) {
+      console.error('Login error:', error); // Debug log
+      
+      // Handle different types of errors
+      let errorMessage = 'Login failed. Please check your credentials and try again.';
+      
+      if (error.status === 401) {
+        errorMessage = 'Invalid email or password. Please check your credentials.';
+      } else if (error.status === 429) {
+        errorMessage = 'Too many failed attempts. Please try again later.';
+      } else if (error.status === 400) {
+        errorMessage = error.message || 'Invalid login data. Please check your information.';
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
       setSubmitMessage({
         type: 'error',
-        text: error.message || 'Login failed. Please check your credentials and try again.'
+        text: errorMessage
       });
     } finally {
       setIsLoading(false);

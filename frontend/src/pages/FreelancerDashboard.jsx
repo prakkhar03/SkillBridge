@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { authAPI } from '../services/api';
 import { Link } from 'react-router-dom';
+import VerificationStatusDisplay from '../components/VerificationStatusDisplay';
 import { 
   FaUserEdit, 
   FaEye, 
@@ -11,7 +12,9 @@ import {
   FaChartLine,
   FaTrophy,
   FaFileAlt,
-  FaStar
+  FaStar,
+  FaSearch,
+  FaBriefcase
 } from 'react-icons/fa';
 
 const colors = {
@@ -210,7 +213,7 @@ export default function FreelancerDashboard() {
 
         {/* Main Actions Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          {/* Profile Management */}
+                    {/* Profile Management */}
           <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
             <div className="flex items-center mb-4">
               <FaUserEdit className="w-8 h-8 text-blue-600 mr-3" />
@@ -223,16 +226,43 @@ export default function FreelancerDashboard() {
               <Link
                 to="/profile/edit"
                 className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center"
-              >
+                >
                 <FaUserEdit className="w-4 h-4 mr-2" />
                 Edit Profile
               </Link>
               <Link
                 to="/profile/view"
                 className="w-full border-2 border-gray-300 text-gray-700 py-3 px-4 rounded-lg hover:border-gray-400 hover:bg-gray-50 transition-colors flex items-center justify-center"
-              >
+                >
                 <FaEye className="w-4 h-4 mr-2" />
                 View Profile
+              </Link>
+            </div>
+          </div>
+
+          {/* Project Discovery */}
+          <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
+            <div className="flex items-center mb-4">
+              <FaSearch className="w-8 h-8 text-green-600 mr-3" />
+              <h3 className="text-xl font-bold text-gray-800">Project Discovery</h3>
+            </div>
+            <p className="text-gray-600 mb-4">
+              Browse available projects and find opportunities that match your skills and experience.
+            </p>
+            <div className="space-y-3">
+              <Link
+                to="/projects"
+                className="w-full bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center"
+              >
+                <FaSearch className="w-4 h-4 mr-2" />
+                Browse Projects
+              </Link>
+              <Link
+                to="/projects/applied"
+                className="w-full border-2 border-gray-300 text-gray-700 py-3 px-4 rounded-lg hover:border-gray-400 hover:bg-gray-50 transition-colors flex items-center justify-center"
+              >
+                <FaBriefcase className="w-4 h-4 mr-2" />
+                My Applications
               </Link>
             </div>
           </div>
@@ -247,6 +277,33 @@ export default function FreelancerDashboard() {
               status={profile?.verification_tag || "Unverified"} 
               rating={profile?.star_rating || 0.0}
             />
+          </div>
+
+          {/* Skills Verification */}
+          <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
+            <div className="flex items-center mb-4">
+              <FaTrophy className="w-8 h-8 text-purple-600 mr-3" />
+              <h3 className="text-xl font-bold text-gray-800">Skills Verification</h3>
+            </div>
+            <p className="text-gray-600 mb-4">
+              Get your skills verified to increase your credibility and access better opportunities.
+            </p>
+            <div className="space-y-3">
+              <Link
+                to="/verification/test"
+                className="w-full bg-purple-600 text-white py-3 px-4 rounded-lg hover:bg-purple-700 transition-colors flex items-center justify-center"
+              >
+                <FaPlay className="w-4 h-4 mr-2" />
+                Take Skills Test
+              </Link>
+              <Link
+                to="/verification/dashboard"
+                className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center"
+              >
+                <FaEye className="w-4 h-4 mr-2" />
+                View Status
+              </Link>
+            </div>
           </div>
 
           {/* Quick Stats */}
@@ -270,6 +327,13 @@ export default function FreelancerDashboard() {
                 <span className="text-gray-600">Experience Level</span>
                 <span className="font-semibold text-gray-800">
                   {profile?.experience_level || "Not Set"}
+                </span>
+              </div>
+              <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                <span className="text-gray-600">Projects Applied</span>
+                <span className="font-semibold text-gray-800">
+                  {/* TODO: Add API call to get applied projects count */}
+                  0
                 </span>
               </div>
             </div>
