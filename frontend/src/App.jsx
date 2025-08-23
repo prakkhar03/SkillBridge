@@ -10,6 +10,10 @@ import AuthPage from "./pages/AuthPage";
 import FreelancerDashboard from "./pages/FreelancerDashboard";
 import ProfileEditPage from "./pages/ProfileEditPage";
 import ProfileViewPage from "./pages/ProfileViewPage";
+import ProjectListingPage from "./pages/ProjectListingPage";
+import AppliedProjectsPage from "./pages/AppliedProjectsPage";
+import SkillsAssessmentPage from "./pages/SkillsAssessmentPage";
+import VerificationDashboardPage from "./pages/VerificationDashboardPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { Footer } from "./ui/landingPage/Footer";
 import SmoothScroll from "./ui/utils/SmoothScroll";
@@ -57,6 +61,38 @@ export default function App() {
                 element={
                   <ProtectedRoute>
                     <ProfileViewPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/projects"
+                element={
+                  <ProtectedRoute>
+                    <ProjectListingPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/projects/applied"
+                element={
+                  <ProtectedRoute>
+                    <AppliedProjectsPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/verification/test"
+                element={
+                  <ProtectedRoute>
+                    <SkillsAssessmentPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/verification/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <VerificationDashboardPage />
                   </ProtectedRoute>
                 }
               />
