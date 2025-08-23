@@ -30,13 +30,24 @@ const apiRequest = async (endpoint, options = {}) => {
     const data = await response.json();
     
     if (!response.ok) {
-      throw new Error(data.message || `HTTP error! status: ${response.status}`);
+      // Create a proper error object with the backend message
+      const error = new Error(data.message || `HTTP error! status: ${response.status}`);
+      error.status = response.status;
+      error.data = data;
+      throw error;
     }
     
     return data;
   } catch (error) {
     console.error('API Error:', error);
-    throw error;
+    // If it's already our custom error, re-throw it
+    if (error.status) {
+      throw error;
+    }
+    // Otherwise, create a generic error
+    const genericError = new Error(error.message || 'Network error occurred');
+    genericError.status = 500;
+    throw genericError;
   }
 };
 
@@ -86,6 +97,94 @@ export const authAPI = {
       body: JSON.stringify(profileData),
     });
   },
+};
+
+// Project API calls
+export const projectAPI = {
+  // Get all available projects
+  getProjects: async (filters = {}) => {
+    const queryParams = new URLSearchParams(filters).toString();
+    const endpoint = queryParams ? `/projects/?${queryParams}` : '/projects/';
+    return apiRequest(endpoint);
+  },
+
+  // Get project details by ID
+  getProjectById: async (projectId) => {
+    return apiRequest(`/projects/${projectId}/`);
+  },
+
+  // Apply to a project
+  applyToProject: async (projectId, applicationData) => {
+    return apiRequest(`/projects/${projectId}/apply/`, {
+      method: 'POST',
+      body: JSON.stringify(applicationData),
+    });
+  },
+
+  // Get user's applied projects
+  getAppliedProjects: async () => {
+    return apiRequest('/projects/applied/');
+  },
+
+  // Get project applicants (for clients)
+  getProjectApplicants: async (projectId) => {
+    return apiRequest(`/projects/${projectId}/applicants/`);
+  },
+};
+
+// Verification API calls
+export const verificationAPI = {
+  // Get verification status
+  getVerificationStatus: async () => {
+    return apiRequest('/verification/status/');
+  },
+
+  // Start verification process
+  startVerification: async () => {
+    return apiRequest('/verification/start/', {
+      method: 'POST',
+    });
+  },
+
+  // Submit skills test
+  submitTest: async (testId, answers) => {
+    return apiRequest(`/verification/test/${testId}/submit/`, {
+      method: 'POST',
+      body: JSON.stringify({ answers }),
+    });
+  },
+
+  // Get test results
+  getTestResults: async (testId) => {
+    return apiRequest(`/verification/test/${testId}/results/`);
+  },
+
+  // Upload resume
+  uploadResume: async (formData) => {
+    return apiRequest('/verification/resume/upload/', {
+      method: 'POST',
+      body: formData,
+      headers: {}, // Let browser set content-type for FormData
+    });
+  },
+
+  // Connect GitHub profile
+  connectGitHub: async (githubUsername) => {
+    return apiRequest('/verification/github/connect/', {
+      method: 'POST',
+      body: JSON.stringify({ github_username: githubUsername }),
+    });
+  },
+
+  // Get GitHub analysis results
+  getGitHubAnalysis: async () => {
+    return apiRequest('/verification/github/analysis/');
+  },
+
+  // Get verification history
+  getVerificationHistory: async () => {
+    return apiRequest('/verification/history/');
+  }
 };
 
 export default authAPI;

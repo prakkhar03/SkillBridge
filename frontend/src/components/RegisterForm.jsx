@@ -83,12 +83,18 @@ export default function RegisterForm({ onSwitchToLogin }) {
     setIsLoading(true);
     
     try {
-      const response = await authAPI.register({
+      const registrationData = {
         email: formData.email.toLowerCase(),
         password: formData.password,
         confirm_password: formData.confirmPassword,
         role: formData.role,
-      });
+      };
+      
+      console.log('Sending registration data:', registrationData); // Debug log
+      
+      const response = await authAPI.register(registrationData);
+
+      console.log('Registration response:', response); // Debug log
 
       setSubmitMessage({
         type: 'success',
@@ -109,9 +115,24 @@ export default function RegisterForm({ onSwitchToLogin }) {
       }, 2000);
 
     } catch (error) {
+      console.error('Registration error:', error); // Debug log
+      
+      // Handle different types of errors
+      let errorMessage = 'Registration failed. Please try again.';
+      
+      if (error.status === 409) {
+        errorMessage = 'Email already registered. Please use a different email or sign in.';
+      } else if (error.status === 400) {
+        errorMessage = error.message || 'Invalid registration data. Please check your information.';
+      } else if (error.status === 403) {
+        errorMessage = error.message || 'Registration not allowed. Please try again later.';
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
       setSubmitMessage({
         type: 'error',
-        text: error.message || 'Registration failed. Please try again.'
+        text: errorMessage
       });
     } finally {
       setIsLoading(false);
