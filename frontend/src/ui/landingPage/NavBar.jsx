@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useAuth } from "../../context/AuthContext"
 import { Link } from "react-router-dom"
 
@@ -10,10 +10,21 @@ const colors = {
 
 export function Navbar() {
   const [open, setOpen] = useState(false)
+  const [navbarHeight, setNavbarHeight] = useState(0)
+  const navbarRef = useRef(null)
   const { isAuthenticated, logout } = useAuth()
 
+  useEffect(() => {
+    if (navbarRef.current) {
+      setNavbarHeight(navbarRef.current.offsetHeight)
+      // Set the navbar height as a CSS custom property
+      document.documentElement.style.setProperty('--navbar-height', `${navbarRef.current.offsetHeight}px`)
+    }
+  }, [isAuthenticated])
+  
   return (
     <nav
+      ref={navbarRef}
       className="w-full max-w-7xl mx-auto mt-4 md:mt-6 rounded-xl shadow-sm"
       style={{ border: `1px solid white` }}
     >

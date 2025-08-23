@@ -1,38 +1,38 @@
 [
   {
     "id": 1,
-    "icon": "target",
-    "title": "SkillDecay Intelligence",
-    "description": "Future-proof your career by tracking the real-time market relevance of your skills."
+    "icon": "ex",
+    "title": "Expert Skill Verification",
+    "description": "Authenticate your abilities through live skill tests, genuine portfolio checks, and verification by experts from top companies and IITs[cite: 16, 22]."
   },
   {
     "id": 2,
-    "icon": "bot", 
-    "title": "AI Project Scope Analyzer",
-    "description": "Instantly assess requirement complexity for smarter scoping and fewer disputes."
+    "icon": "bot",
+    "title": "AI-Powered Project Matching",
+    "description": "Our intelligent algorithm connects clients with the perfect freelancer based on verified skills, experience, budget, and time zone to ensure the best fit[cite: 17]."
   },
   {
     "id": 3,
-    "icon": "trophy",
-    "title": "Universal Reputation System",
-    "description": "Own your reputation. Import and verify ratings from any platform in one place."
+    "icon": "target",
+    "title": "Predictive Success Scoring",
+    "description": "Leverage our AI to see a project's probability of success before it begins, minimizing risk and ensuring better outcomes[cite: 18, 29]."
   },
   {
     "id": 4,
-    "icon": "stats",
-    "title": "Predictive Success Scoring",
-    "description": "AI-powered compatibility matching based on proven patterns of project success."
+    "icon": "br",
+    "title": "Skill Decay Intelligence",
+    "description": "Stay ahead of the curve. [cite_start]Our platform tracks when your skills are becoming outdated, prompting you to learn new, in-demand abilities[cite: 26]."
   },
   {
     "id": 5,
-    "icon": "stats",
-    "title": "Predictive Success Scoring",
-    "description": "AI-powered compatibility matching based on proven patterns of project success."
+    "icon": "trophy",
+    "title": "Universal Reputation System",
+    "description": "Consolidate your credibility. [cite_start]We enable freelancers to carry their verified reputation and skill certificates across multiple platforms[cite: 28]."
   },
   {
     "id": 6,
     "icon": "stats",
-    "title": "Predictive Success Scoring",
-    "description": "AI-powered compatibility matching based on proven patterns of project success."
+    "title": "AI Project Scope Analyzer",
+    "description": "Avoid project disputes before they happen. [cite_start]Our AI analyzes project requirements in detail to prevent scope creep and conflict[cite: 27]."
   }
 ]

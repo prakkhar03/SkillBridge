@@ -1,8 +1,8 @@
 import { HeroSection } from "../ui/landingPage/HeroSection";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { Navbar } from "../ui/landingPage/NavBar";
 import StorySection from "../ui/landingPage/StorySection";
+import ParallaxElement from "../ui/utils/ParallaxElement";
 gsap.registerPlugin(ScrollTrigger);
 
 export default function HomePage() {
@@ -12,9 +12,8 @@ export default function HomePage() {
       // style={{ backgroundColor: colors.background }}
     >
       {/* Landing Page Content */}
-      <HeroSection>
-        <Navbar />
-      </HeroSection>
+      {/* <ParallaxElement /> */}
+      <HeroSection />
       <StorySection />
     </div>
   );
