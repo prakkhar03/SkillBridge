@@ -6,6 +6,8 @@ import { IoStatsChartOutline } from 'react-icons/io5';
 import { IoTrophyOutline } from 'react-icons/io5';
 import { FaRobot } from 'react-icons/fa';
 import { TbTargetArrow } from 'react-icons/tb';
+import { GrUserExpert } from "react-icons/gr";
+import { TbBrain } from "react-icons/tb";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -13,15 +15,41 @@ const iconMap = {
   target: <TbTargetArrow />,
   bot: <FaRobot />,
   trophy: <IoTrophyOutline />,
-  stats: <IoStatsChartOutline />
+  stats: <IoStatsChartOutline />,
+  ex: <GrUserExpert />,
+  br: <TbBrain />
 };
 
-// Consistent card sizing
 const FeatureCard = ({ title, description, icon }) => (
-  <div className="bg-gray-900 p-10 rounded-2xl border border-gray-700/50 shadow-lg w-full h-[380px] flex flex-col text-left">
-    <div className="text-5xl mb-6 text-sky-400">{icon}</div>
-    <h3 className="text-2xl font-bold mb-4 text-white">{title}</h3>
-    <p className="text-gray-400 text-base leading-relaxed flex-grow">{description}</p>
+  <div className="relative w-full h-full rounded-xl overflow-hidden border border-white/10"
+    style={{
+      // stronger, more opaque gradient background
+      background: "linear-gradient(to bottom, rgba(255,255,255,0.15), rgba(255,255,255,0.05))",
+      boxShadow: "0 10px 30px rgba(0,0,0,0.35)"
+    }}>
+    {/* big icon top-left */}
+    <div className="absolute top-6 left-6 z-10 text-pink-400 opacity-95 select-none pointer-events-none"
+         style={{ fontSize: 'clamp(44px, 6.5vw, 100px)', lineHeight: 1 }}>
+      {icon}
+    </div>
+
+    {/* subtle frame / inner padding */}
+    <div className="absolute inset-0 p-6 md:p-8 flex flex-col justify-end">
+      <h3 className="text-2xl md:text-3xl lg:text-4xl font-extrabold text-white leading-tight mb-3">
+        {title}
+      </h3>
+      <p className="text-base md:text-lg lg:text-xl text-gray-300 leading-relaxed"
+          style={{
+            maxHeight: "48vh",   
+            overflowY: "auto",
+            paddingRight: "6px", 
+          }}>
+        {description}
+      </p>
+    </div>
+
+    {/* faint border inside for the aesthetic from screenshot */}
+    <div className="absolute inset-2 rounded-md pointer-events-none " style={{ border: '1px solid rgba(255,255,255,0.04)', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)' }} />
   </div>
 );
 
@@ -34,26 +62,11 @@ export default function StorySection() {
   useEffect(() => {
     const ctx = gsap.context(() => {
       // ==========================
-      // Areas you can tweak later
+      // Tweakable global values
       // ==========================
-      // 1) computeEnd base: controls overall pinned scroll length for the entire 4-scene story.
-      //    - Larger value -> more scroll space -> slower animations (more readable).
-      //    TWEAK HERE: change `base` value or return string directly (e.g. `+=600%`).
-      const computeEnd = () => {
-        const base = 450; // <-- TWEAK: total base scroll percent for the whole section (in % of viewport height)
-        // You can increase base to 550 or 650 for even slower motion.
-        return `+=${base}%`;
-      };
+      const computeEnd = () => `+=700%`;
+      const scrubSetting = true;
 
-      // 2) scrub smoothing: set to `true` for 1:1 scroll mapping, or a number like 0.6 for lagged smoothing.
-      //    TWEAK HERE: change `scrub` value below (true | 0.6 | 1.2 etc.)
-      const scrubSetting = true; // <-- TWEAK: set to `true` (precise) or a numeric value for smoothing
-
-      // 3) Easing presets: you can change easings used throughout.
-      //    Example: 'power3.out', 'power2.inOut', 'sine.inOut', 'elastic.out(1, 0.5)'
-      //    TWEAK: update easings in timeline tweens below for different feels.
-
-      // Main timeline with scrub setting variable so you can tweak easily
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: main.current,
@@ -65,16 +78,15 @@ export default function StorySection() {
           invalidateOnRefresh: true
         }
       });
-
       // ---------------------
-      // Scene 1 - timings you can tweak
+      // Scene 1
       // ---------------------
       const scene1 = {
         titleX: -120,
         imgX: 120,
-        stagger: 0.35,   // <-- TWEAK: change stagger between title and subtitle
-        duration: 1.6,   // <-- TWEAK: change entrance duration for Scene 1
-        exitDuration: 1.0
+        stagger: 1,
+        duration: 2,
+        exitDuration: 1.4
       };
 
       tl.addLabel('scene1-start')
@@ -92,7 +104,6 @@ export default function StorySection() {
           ease: 'power3.out'
         }, '<0.2');
 
-      // Pace the exit so it doesn't snap - tweak exitDuration above
       tl.to('.scene-1-content', {
         opacity: 0,
         y: -60,
@@ -106,13 +117,13 @@ export default function StorySection() {
       }, '<');
 
       // ---------------------
-      // Scene 2 - meter and score (tweak durations here)
+      // Scene 2
       // ---------------------
       const scene2 = {
         titleStagger: 0.35,
         titleDuration: 1.4,
         meterDuration: 1.4,
-        scoreDuration: 2.6 // <-- TWEAK: how long the score counts from 0->900
+        scoreDuration: 2.6
       };
 
       tl.from('.vision-title, .vision-subtitle', {
@@ -129,7 +140,6 @@ export default function StorySection() {
         ease: 'elastic.out(1, 0.5)'
       }, '-=0.6');
 
-      // Score number animation (readable)
       tl.to(
         { value: 0 },
         {
@@ -163,7 +173,6 @@ export default function StorySection() {
         }
       );
 
-      // Scene 2 exit
       tl.to('.scene-2-content', {
         opacity: 0,
         y: -50,
@@ -174,15 +183,13 @@ export default function StorySection() {
       .from('.features-intro-title, .features-intro-subtitle', {
         opacity: 0,
         y: 50,
-        stagger: 0.25,
-        duration: 1.2,
+        stagger: 0.5,
+        duration: 1.5,
         ease: 'power3.out'
       });
 
-      // Hold briefly so the intro copy is readable
       tl.to({}, { duration: 0.6 });
 
-      // Scene 3 exit
       tl.to('.features-intro-title, .features-intro-subtitle', {
         opacity: 0,
         y: -40,
@@ -191,44 +198,59 @@ export default function StorySection() {
       });
 
       // ---------------------
-      // Scene 4 - Feature Cards (timing & sizes are tweak points)
+      // Scene 4 - Feature Cards 
       // ---------------------
       const cards = gsap.utils.toArray('.feature-card-item');
       const cardsRow = cardsRowRef.current;
+      const cardsViewport = cardsViewportRef.current;
 
-      // TWEAK: cardEntrance config
+      // Card sizing / entrance config (tweak these to taste)
       const cardEntrance = {
-        initialOffsetMultiplier: 1.0, // multiplies window.innerWidth for initial offscreen x (1.0 = full width)
-        perCardOffset: 120,           // px added per card to push them further right
-        stagger: 0.45,                // <-- TWEAK: per-card stagger for entrance
-        duration: 1.2,                // <-- TWEAK: entrance duration for each card
-        scaleStart: 0.96
+        initialOffsetMultiplier: 1.0, // full viewport width initial offset
+        stagger: 2.0,                // per-card entrance stagger
+        duration: 2.5,                // entrance duration for each card
+        scaleStart: 0.98
       };
 
-      // set initial off-screen positions for cards. Adjust initialOffsetMultiplier or perCardOffset above.
+      // Responsive widths are controlled via the element classes in JSX below.
+      // We compute real gap using computed styles (so the formula remains correct if you change CSS)
+      const getGap = () => {
+        if (!cardsRow) return 40;
+        const style = getComputedStyle(cardsRow);
+        // modern browsers provide gap numeric value; fallback to 40
+        const g = parseFloat(style.gap || style.columnGap || 40);
+        return isNaN(g) ? 40 : g;
+      };
+
+      // Set initial offscreen positions (to the right)
       gsap.set(cards, {
-        x: (i) => (window.innerWidth * cardEntrance.initialOffsetMultiplier) + (i * cardEntrance.perCardOffset),
+        x: (i) => (window.innerWidth * cardEntrance.initialOffsetMultiplier) + (i * getGap()),
         opacity: 0,
         scale: cardEntrance.scaleStart,
         willChange: 'transform, opacity'
       });
 
-      // Helper: calculates exact slide distance so final card is flush to right edge.
-      // TWEAK: gap here should match your CSS gap (gap-10 => 2.5rem => 40px)
+      // Helper: calculate exact slide distance so the last card ends flush with the right edge
       const calculateSlideDistance = () => {
         if (!cardsRow || cards.length === 0) return 0;
 
-        const cardEl = cards[0];
-        const cardWidth = cardEl.offsetWidth;
-        const gap = 40; // <-- TWEAK: update if you change CSS gap
-        const totalRowWidth = (cardWidth * cards.length) + (gap * (cards.length - 1));
-        const viewportWidth = cardsRow.parentElement.offsetWidth;
+        // Use actual measured widths for accuracy
+        let totalWidth = 0;
+        cards.forEach((c) => {
+          totalWidth += c.offsetWidth;
+        });
 
-        // translate left by the exact difference so the last card is flush on the right
-        return Math.max(0, totalRowWidth - viewportWidth);
+        const gap = getGap();
+        const totalRowWidth = totalWidth + (gap * (cards.length - 1));
+        // viewport area where cards move
+        const viewportWidth = cardsRow.parentElement ? cardsRow.parentElement.offsetWidth : window.innerWidth;
+
+        // If the row is wider than the viewport, translate left by the overflow amount so last card becomes flush
+        const overflow = Math.max(0, totalRowWidth - viewportWidth);
+        return Math.round(overflow);
       };
 
-      // Card entrance: controlled by cardEntrance values above
+      // Card entrance (fade + slide-in)
       tl.addLabel('cards-enter')
         .to(cards, {
           x: 0,
@@ -239,41 +261,34 @@ export default function StorySection() {
           ease: 'power3.out'
         }, 'cards-enter');
 
-      // small readable pause
-      tl.to({}, { duration: 0.4 });
+      // small readable pause after cards appear
+      tl.to({}, { duration: 1 });
 
-      // Horizontal translation: slow and steady. TWEAK: change duration to slow/faster.
-      const horizontal = {
-        duration: 4.0, // <-- TWEAK: total duration of the horizontal translation (higher = slower)
-        ease: 'power1.inOut'
-      };
+      // Horizontal translation: slowed down significantly so cards are readable.
+      // Duration scales with number of cards for consistent speed across counts.
+      const baseDuration = 10.0; // base slowdown value (increase to make slower)
+      const perCardExtra = 1.8;  // additional seconds per card
+      const horizontalDuration = Math.max(baseDuration, baseDuration + (cards.length - 3) * perCardExtra);
 
       tl.to(cardsRow, {
-        x: () => `-${Math.round(calculateSlideDistance())}`,
-        duration: horizontal.duration,
-        ease: horizontal.ease
-      }, 'cards-enter+=0.6');
+        x: () => `-${calculateSlideDistance()}`,
+        duration: horizontalDuration,
+        ease: 'power1.inOut'
+      }, 'cards-enter+=0.8');
 
-      // final hold before unpin/transition
-      tl.to({}, { duration: 0.8 });
+      // final hold before unpin / end of this pinned section
+      tl.to({}, { duration: 1.8 });
 
-      // ---------------------
-      // Refresh handlers: keep this to ensure layout/timings recalc on resize
-      // If you tweak sizes/gaps dynamically, call ScrollTrigger.refresh() after DOM changes.
-      // ---------------------
+      // Keep calculations robust on refresh
       ScrollTrigger.addEventListener('refreshInit', () => {
         gsap.set(cards, {
-          x: (i) => (window.innerWidth * cardEntrance.initialOffsetMultiplier) + (i * cardEntrance.perCardOffset),
+          x: (i) => (window.innerWidth * cardEntrance.initialOffsetMultiplier) + (i * getGap()),
           opacity: 0
         });
       });
 
-      ScrollTrigger.addEventListener('refresh', () => {
-        // re-evaluate calculateSlideDistance on refresh (no-op necessary here)
-      });
-
-      // Optional helper exposed for debugging in console (not required)
-      // window.__story_debug = { calculateSlideDistance };
+      // Optional debug helper
+      // window.__story_debug = { calculateSlideDistance, getGap };
 
     }, main);
 
@@ -281,7 +296,7 @@ export default function StorySection() {
   }, []);
 
   return (
-    <section ref={main} className="relative text-white overflow-hidden">
+    <section id="story-section" ref={main} className="relative text-white overflow-hidden">
       <div className="relative h-screen">
         {/* Scene 1 */}
         <div className="scene-1-content absolute inset-0 flex flex-col md:flex-row items-center justify-center gap-8 md:gap-16">
@@ -289,7 +304,7 @@ export default function StorySection() {
             <h2 className="freelance-title text-5xl md:text-6xl font-bold">The Freelance Gamble</h2>
             <p className="freelance-subtitle text-lg text-gray-400 mt-2">Replacing uncertainty with reliability.</p>
           </div>
-          <img src="https://i.imgur.com/2c13BAu.png" alt="Graph" className="graph-img w-64 md:w-96 rounded-lg shadow-lg" />
+          <img src="stats.jpeg" alt="Graph" className="graph-img w-64 md:w-96 rounded-lg shadow-lg" />
         </div>
 
         {/* Scene 2 */}
@@ -324,17 +339,17 @@ export default function StorySection() {
           <p className="features-intro-subtitle mt-4 text-lg md:text-xl text-slate-400 max-w-3xl mx-auto">AI-powered matching and skill verification for trusted freelancer-client connections.</p>
         </div>
 
-        {/* Scene 4 - Feature Cards */}
+        {/* Scene 4 - Feature Cards (layout updated) */}
         <div className="absolute inset-0 z-0 flex items-center justify-center px-4">
           <div className="container mx-auto w-full">
             <div ref={cardsViewportRef} className="overflow-hidden w-full">
-              <div ref={cardsRowRef} className="flex gap-10 items-stretch justify-start py-10">
+              <div ref={cardsRowRef} className="flex gap-16 items-stretch justify-start py-10">
                 {features.slice(0, 6).map((feature) => {
                   const Icon = iconMap[feature.icon];
                   return (
                     <div 
                       key={feature.id} 
-                      className="feature-card-item flex-shrink-0 w-[320px] md:w-[380px] lg:w-[420px]"
+                      className="feature-card-item flex-shrink-0 w-[280px] sm:w-[340px] md:w-[420px] lg:w-[520px] h-[480px] md:h-[640px] xl:h-[720px]"
                     >
                       <FeatureCard 
                         title={feature.title} 

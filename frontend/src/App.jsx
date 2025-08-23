@@ -14,6 +14,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import { Footer } from "./ui/landingPage/Footer";
 import SmoothScroll from "./ui/utils/SmoothScroll";
 import ParticleBackground from "./ui/utils/ParticleBackground";
+import { Navbar } from "./ui/landingPage/NavBar";
 
 export default function App() {
   return (
@@ -30,6 +31,7 @@ export default function App() {
       />
       <Router>
         <div className="min-h-screen relative">
+          <Navbar />
           <SmoothScroll>
             <Routes>
               <Route path="/" element={<HomePage />} />

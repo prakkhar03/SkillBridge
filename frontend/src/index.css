@@ -51,3 +51,12 @@
 .animate-shine {
   animation: shine 3s linear infinite; /* You can adjust the duration here or let the inline style override it */
 }
+
+.page-panel {
+  /* ensures page panels respect nav area and don't overlap */
+  min-height: calc(100vh - var(--nav-height, 0px));
+  display: block;
+  position: relative;
+  will-change: transform, opacity;
+}
+
