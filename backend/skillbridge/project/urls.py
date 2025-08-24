@@ -1,7 +1,8 @@
 from django.urls import path
 from .views import (
     FreelanceProjectCreateView, FreelanceProjectUpdateView, FreelanceProjectDetailView,
-    FreelanceProjectListView, FreelanceProjectDeleteView, FreelanceProjectApplyView,ApplicantDetails
+    FreelanceProjectListView, FreelanceProjectDeleteView, FreelanceProjectApplyView,ApplicantDetails,
+    OpenProjectView, ClosedProjectView,AcceptApplicantView,RejectApplicantView
 )
 
 urlpatterns = [
@@ -12,4 +13,9 @@ urlpatterns = [
     path("<uuid:project_id>/delete/", FreelanceProjectDeleteView.as_view(), name="project-delete"),
     path("<uuid:project_id>/apply/", FreelanceProjectApplyView.as_view(), name="project-apply"),
     path("<uuid:project_id>/applicants/", ApplicantDetails.as_view(), name="project-apply"),
+    path("<uuid:project_id>/accept/<int:applicant_id>/", AcceptApplicantView.as_view(), name="accept-applicant"),
+    path("<uuid:project_id>/reject/<int:applicant_id>/", RejectApplicantView.as_view(), name="reject-applicant"),
+    path("open/", OpenProjectView.as_view(), name="open-projects"),
+    path("closed/", ClosedProjectView.as_view(), name="closed-projects"),   
+    
 ]

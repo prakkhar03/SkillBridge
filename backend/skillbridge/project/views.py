@@ -143,3 +143,97 @@ class ApplicantDetails(APIView):
         except Exception as e:
             logger.exception(f"Unexpected error in ApplicantDetails: {str(e)}")
             return Response({'error': 'Unexpected error occurred', 'details': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+class AcceptApplicantView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, project_id, applicant_id):
+        try:
+            project = FreelanceProject.objects.get(id=project_id)
+            if request.user.role != "client" or project.created_by != request.user:
+                return Response({'error': 'Permission denied.'}, status=status.HTTP_403_FORBIDDEN)
+
+            try:
+                applicant = Profile.objects.get(id=applicant_id, role="freelancer")
+            except Profile.DoesNotExist:
+                return Response({'error': 'Applicant not found or not a freelancer.'}, status=status.HTTP_404_NOT_FOUND)
+
+            if applicant not in project.applicants.all():
+                return Response({'error': 'This user did not apply for the project.'}, status=status.HTTP_400_BAD_REQUEST)
+
+            project.accepted_freelancer = applicant
+            project.is_open = False  
+            project.save()
+
+            return Response({'message': 'Applicant accepted successfully.'}, status=status.HTTP_200_OK)
+
+        except FreelanceProject.DoesNotExist:
+            return Response({'error': 'Project not found.'}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            logger.exception(f"Unexpected error in AcceptApplicantView: {str(e)}")
+            return Response({'error': 'Unexpected error occurred', 'details': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class CloseProjectView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, project_id):
+        try:
+            project = FreelanceProject.objects.get(id=project_id)
+            if request.user.role != "client" or project.created_by != request.user:
+                return Response({'error': 'Permission denied.'}, status=status.HTTP_403_FORBIDDEN)
+
+            project.is_open = False
+            project.save()
+            return Response({'message': 'Project closed successfully.'}, status=status.HTTP_200_OK)
+
+        except FreelanceProject.DoesNotExist:
+            return Response({'error': 'Project not found.'}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            logger.exception(f"Unexpected error in CloseProjectView: {str(e)}")
+            return Response({'error': 'Unexpected error occurred', 'details': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+class OpenProjectView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, project_id):
+        try:
+            project = FreelanceProject.objects.get(id=project_id)
+            if request.user.role != "client" or project.created_by != request.user:
+                return Response({'error': 'Permission denied.'}, status=status.HTTP_403_FORBIDDEN)
+
+            if project.accepted_freelancer is not None:
+                return Response({'error': 'Cannot reopen a project with an accepted freelancer.'}, status=status.HTTP_400_BAD_REQUEST)
+
+            project.is_open = True
+            project.save()
+            return Response({'message': 'Project reopened successfully.'}, status=status.HTTP_200_OK)
+
+        except FreelanceProject.DoesNotExist:
+            return Response({'error': 'Project not found.'}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            logger.exception(f"Unexpected error in OpenProjectView: {str(e)}")
+            return Response({'error': 'Unexpected error occurred', 'details': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+class RejectApplicantView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, project_id, applicant_id):
+        try:
+            project = FreelanceProject.objects.get(id=project_id)
+            if request.user.role != "client" or project.created_by != request.user:
+                return Response({'error': 'Permission denied.'}, status=status.HTTP_403_FORBIDDEN)
+
+            try:
+                applicant = Profile.objects.get(id=applicant_id, role="freelancer")
+            except Profile.DoesNotExist:
+                return Response({'error': 'Applicant not found or not a freelancer.'}, status=status.HTTP_404_NOT_FOUND)
+
+            if applicant not in project.applicants.all():
+                return Response({'error': 'This user did not apply for the project.'}, status=status.HTTP_400_BAD_REQUEST)
+
+            project.applicants.remove(applicant)
+            return Response({'message': 'Applicant rejected successfully.'}, status=status.HTTP_200_OK)
+
+        except FreelanceProject.DoesNotExist:
+            return Response({'error': 'Project not found.'}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            logger.exception(f"Unexpected error in RejectApplicantView: {str(e)}")
+            return Response({'error': 'Unexpected error occurred', 'details': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
