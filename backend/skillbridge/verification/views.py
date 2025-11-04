@@ -8,10 +8,10 @@ from django.contrib.auth import get_user_model
 from .models import SkillVerification,SkillTest,TestResult
 from .serializer import VerificationStatusSerializer, AdminVerifySerializer
 from accounts.models import Profile
-from utils.utils import (
+from .utils.pdf_utils import (
     extract_text_from_pdf_fileobj
 )
-from utils.langchain_utils import *
+from .utils.langchain_utils import *
 
 User = get_user_model()
 

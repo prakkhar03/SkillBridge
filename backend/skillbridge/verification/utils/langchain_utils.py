@@ -4,7 +4,7 @@ from langchain_core.output_parsers import StrOutputParser
 from dotenv import load_dotenv
 import os
 load_dotenv()
-API_KEY = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
+API_KEY = os.getenv("GEMINI_API_KEY") 
 if not API_KEY:
     raise ValueError("GEMINI_API_KEY or GOOGLE_API_KEY is missing. Set it in your .env file.")
 model = GoogleGenerativeAI(model="gemini-1.5-pro", temperature=0, api_key=API_KEY)
