@@ -8,14 +8,10 @@ from django.contrib.auth import get_user_model
 from .models import SkillVerification,SkillTest,TestResult
 from .serializer import VerificationStatusSerializer, AdminVerifySerializer
 from accounts.models import Profile
-from .utils import (
-    extract_text_from_pdf_fileobj,
-    extract_and_analyze_resume,
-    analyze_github_with_gemini,
-    generate_gemini_recommendation,
-    generate_tests_based_on_profile,
-    final_analysis_with_gemini
+from utils.utils import (
+    extract_text_from_pdf_fileobj
 )
+from utils.langchain_utils import *
 
 User = get_user_model()
 
@@ -39,15 +35,13 @@ class StartVerificationView(APIView):
         else:
             verification = SkillVerification(user=request.user, verification_status="PENDING")
 
-        resume_analysis = extract_and_analyze_resume(profile.resume) if profile.resume else None
-        github_analysis = analyze_github_with_gemini(profile.github_url) if profile.github_url else None
+    
+        resume_text=extract_text_from_pdf_fileobj(profile.resume)
+        resume_analysis=analyze_resume(resume_text) if profile.resume else None
+        github_analysis=analyze_github_profile(profile.github_url) if profile.github_url else None
 
-        recommendation = generate_gemini_recommendation(
-            resume_analysis or "",
-            github_analysis or "",
-            profile.skills
-        )
-
+        recommendation = generate_final_report(resume_analysis, github_analysis)
+        
         verification.resume_analysis = resume_analysis or ""
         verification.github_analysis = github_analysis or ""
         verification.gemini_recommendation = recommendation
@@ -119,7 +113,7 @@ class TestView(APIView):
         if not verification:
             return Response({"error": "No verification found"}, status=status.HTTP_404_NOT_FOUND)
         
-        test_data = generate_tests_based_on_profile(
+        test_data = generate_test(
             resume_analysis=verification.resume_analysis,
             github_analysis=verification.github_analysis,
             skills=profile.skills,
@@ -175,7 +169,7 @@ class SubmitTestView(APIView):
         verification = SkillVerification.objects.filter(user=request.user).order_by('-created_at').first()
         if verification:
             # Run final analysis
-            combined_analysis = final_analysis_with_gemini(
+            combined_analysis = final_analysis(
                 resume_analysis=verification.resume_analysis,
                 github_analysis=verification.github_analysis,
                 previous_recommendation=verification.gemini_recommendation,
@@ -183,10 +177,10 @@ class SubmitTestView(APIView):
                 test_result=result
             )
             verification.gemini_recommendation = combined_analysis
-            verification.verification_status = "PENDING"  # ✅ mark for admin review
+            verification.verification_status = "PENDING"  
             verification.save()
 
-        # Reset profile tag to Unverified until admin approval
+        
         profile = Profile.objects.filter(user=request.user).first()
         if profile:
             profile.verification_tag = "Unverified"

@@ -99,7 +99,7 @@ def generate_test(resume_analysis: str, github_analysis: str, skills=None, recom
 
 from langchain.prompts import PromptTemplate
 import json,re
-def final_analysis_with_langchain(resume_analysis:str,github_analysis:str,previous_recommendation:str,test_score:float,test_result:str):
+def final_analysis(resume_analysis:str,github_analysis:str,previous_recommendation:str,test_score:float,test_result:str):
     prompt=PromptTemplate(
         input_variables=["resume_analysis","github_analysis","previous_recommendation","test_score","test_result"],
         template="""
