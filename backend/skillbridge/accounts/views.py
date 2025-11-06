@@ -11,7 +11,7 @@ from django.core.exceptions import ValidationError as DjangoValidationError
 from django.core.cache import cache
 import logging
 from accounts.utils import send_verification_email, get_tokens_for_user, send_login_alert_email
-from .serializer import RegisterSerializer, LoginSerializer, UserDataSerializer,ProfileSerializer,ClientCompanySerializer,ClientDocumentSerializer,ClientContactSerializer
+from .serializer import RegisterSerializer, LoginSerializer, UserDataSerializer, ProfileSerializer, ClientCompanySerializer, ClientDocumentSerializer, ClientContactSerializer
 from rest_framework import viewsets, permissions
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -43,20 +43,28 @@ class RegisterView(APIView):
                 if existing_user:
                     if not existing_user.verified:
                         tokens = get_tokens_for_user(existing_user)
-                        send_verification_email(existing_user, tokens['access'])
-                        return Response({"message": "User exists but not verified. Verification email resent."}, status=403)
+                        # Temporarily commented out due to email configuration issues
+                        # send_verification_email(existing_user, tokens['access'])
+                        return Response({
+                            "message": "User exists but not verified. Email verification temporarily disabled.",
+                            "data": {
+                                "user": UserDataSerializer(existing_user).data,
+                                "tokens": tokens
+                            }
+                        }, status=403)
                     return Response({"message": "Email already registered"}, status=409)
 
                 serializer.is_valid(raise_exception=True)
                 user = serializer.save()
                 tokens = get_tokens_for_user(user)
-                send_verification_email(user, tokens['access'])
+                # Temporarily commented out due to email configuration issues
+                # send_verification_email(user, tokens['access'])
 
                 return Response({
                     "status": 201,
-                    "message": "User created successfully. Verification email sent.",
+                    "message": "User created successfully. Email verification temporarily disabled.",
                     "data": {
-                        "user": serializer.data,
+                        "user": UserDataSerializer(user).data,
                         "tokens": tokens
                     }
                 }, status=201)
@@ -103,8 +111,9 @@ class LoginView(APIView):
             user = serializer.context['user']
             if not user.verified:
                 tokens = get_tokens_for_user(user)
-                send_verification_email(user, tokens['access'])
-                return Response({"message": "Email not verified. Verification email resent."}, status=403)
+                # Temporarily commented out due to email configuration issues
+                # send_verification_email(user, tokens['access'])
+                return Response({"message": "Email not verified. Email verification temporarily disabled."}, status=403)
 
             cache.delete(cache_key_attempts)
             cache.delete(cache_key_blocked)
@@ -128,7 +137,9 @@ class LoginView(APIView):
                 cache.set(cache_key_blocked, True, timeout=COOLDOWN_SECONDS)
                 user = User.objects.filter(email=email).first()
                 if user:
-                    send_login_alert_email(user)
+                    # Temporarily commented out due to email configuration issues
+                    # send_login_alert_email(user)
+                    pass
 
             return Response({"message": "Invalid credentials", "errors": e.detail}, status=400)
 

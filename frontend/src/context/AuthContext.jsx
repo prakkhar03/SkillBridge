@@ -19,18 +19,38 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     // Check if user is already authenticated on app load
     const token = getToken();
+    console.log('AuthContext: Checking for existing token:', token ? 'Found' : 'Not found');
+    
     if (token) {
       // You can validate the token here or fetch user data
       setIsAuthenticated(true);
       // For now, we'll just set a basic user object
       setUser({ isAuthenticated: true });
+      console.log('AuthContext: User authenticated from existing token');
+    } else {
+      console.log('AuthContext: No token found, user not authenticated');
+      setIsAuthenticated(false);
+      setUser(null);
     }
     setIsLoading(false);
+    console.log('AuthContext: Initial loading complete');
   }, []);
 
   const login = (userData) => {
+    console.log('AuthContext: Login called with userData:', userData);
+    
+    // Update both states synchronously
     setUser(userData);
     setIsAuthenticated(true);
+    
+    console.log('AuthContext: Authentication state updated - isAuthenticated:', true, 'user:', userData);
+    
+    // Force a re-render and ensure state is properly set
+    setTimeout(() => {
+      console.log('AuthContext: Forcing re-render after login');
+      setIsAuthenticated(true);
+      setUser(userData);
+    }, 100);
   };
 
   const logout = () => {
