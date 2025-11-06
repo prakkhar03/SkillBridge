@@ -28,3 +28,7 @@ rsa==4.9.1
 sqlparse==0.5.3
 tqdm==4.67.1
 typing_extensions
+langchain==0.1.16
+langchain-google-genai
+google-generativeai==0.3.2
+google-ai-generativelanguage==0.4.0
