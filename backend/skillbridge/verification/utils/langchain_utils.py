@@ -1,13 +1,13 @@
 from langchain_google_genai import GoogleGenerativeAI
 from langchain_core.prompts import PromptTemplate
-from langchain_core.output_parsers import StrOutputParser
+from langchain_core.output_parsers import StrOutputParser, JsonOutputParser
 from dotenv import load_dotenv
 import os
 load_dotenv()
-API_KEY = os.getenv("GEMINI_API_KEY") 
+API_KEY = os.getenv("GEMINI_API_KEY")
 if not API_KEY:
     raise ValueError("GEMINI_API_KEY or GOOGLE_API_KEY is missing. Set it in your .env file.")
-model = GoogleGenerativeAI(model="gemini-1.5-pro", temperature=0, api_key=API_KEY)
+model = GoogleGenerativeAI(model="gemini-2.5-pro", temperature=0, api_key=API_KEY)
 def analyze_resume(resume_text: str) -> str:
     template = PromptTemplate(
         input_variables=["resume_text"],
@@ -54,6 +54,7 @@ def generate_final_report(resume_analysis: str, github_analysis: str) -> str:
     chain = template | model | StrOutputParser()
     return chain.invoke({"resume_analysis": resume_analysis, "github_analysis": github_analysis})
 def generate_test(resume_analysis: str, github_analysis: str, skills=None, recommendation=None, num_questions=5, role_hint="Developer") -> str:
+    parser = JsonOutputParser()
     template = PromptTemplate(
         input_variables=["resume_analysis", "github_analysis", "skills", "recommendation", "num_questions", "role_hint"],
         template="""
@@ -87,8 +88,8 @@ def generate_test(resume_analysis: str, github_analysis: str, skills=None, recom
         }}
         """
     )
-    chain = template | model | StrOutputParser()
-    return chain.invoke({
+    chain = template | model | parser
+    r=chain.invoke({
         "resume_analysis": resume_analysis,
         "github_analysis": github_analysis,
         "skills": skills,
@@ -96,6 +97,7 @@ def generate_test(resume_analysis: str, github_analysis: str, skills=None, recom
         "num_questions": num_questions,
         "role_hint": role_hint
     })
+    return r
 
 from langchain.prompts import PromptTemplate
 import json,re
