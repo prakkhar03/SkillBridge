@@ -96,23 +96,51 @@ export default function RegisterForm({ onSwitchToLogin }) {
 
       console.log('Registration response:', response); // Debug log
 
-      setSubmitMessage({
-        type: 'success',
-        text: response.message || 'Registration successful! Please check your email for verification.'
-      });
-
       // Store tokens if provided
       if (response.data?.tokens) {
         const { access, refresh } = response.data.tokens;
         localStorage.setItem('access_token', access);
         localStorage.setItem('refresh_token', refresh);
+        console.log('Tokens stored successfully');
+        
+        // Verify tokens are stored
+        const storedAccess = localStorage.getItem('access_token');
+        const storedRefresh = localStorage.getItem('refresh_token');
+        console.log('Verification - Stored access token:', storedAccess ? 'Present' : 'Missing');
+        console.log('Verification - Stored refresh token:', storedRefresh ? 'Present' : 'Missing');
+      } else {
+        console.warn('No tokens received in response');
       }
 
-      // Update auth context and redirect to dashboard
-      login(response.data?.user || { email: formData.email, role: formData.role });
+      // Update auth context with proper user data
+      const userData = response.data?.user || { 
+        email: formData.email, 
+        role: formData.role,
+        verified: false, // Since email verification is disabled
+        onboarding_stage: 0
+      };
+      
+      console.log('Setting user data:', userData); // Debug log
+      console.log('Response data structure:', response.data);
+      console.log('User data from response:', response.data?.user);
+      
+      // Show success message first
+      setSubmitMessage({
+        type: 'success',
+        text: 'Registration successful! Setting up your account...'
+      });
+      
+      // Wait a bit for the auth context to update, then redirect
       setTimeout(() => {
-        navigate('/dashboard');
-      }, 2000);
+        console.log('Calling login function...');
+        login(userData);
+        
+        // Wait for authentication state to update
+        setTimeout(() => {
+          console.log('Authentication state should be updated, redirecting to dashboard...');
+          navigate('/dashboard');
+        }, 500);
+      }, 1000);
 
     } catch (error) {
       console.error('Registration error:', error); // Debug log
