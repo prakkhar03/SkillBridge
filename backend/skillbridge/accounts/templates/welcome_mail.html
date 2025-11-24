@@ -1,87 +1,51 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-  <head>
-    <title>Welcome Onboard - SkillBridge</title>
-    <meta http-equiv="x-ua-compatible" content="IE=edge">
-    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="https://fonts.googleapis.com/css?family=Lato:400,700" rel="stylesheet" type="text/css">
-    <style type="text/css">
-      body {
-        background-color: #F6F6FC;
-        margin: 0;
-        padding: 0;
-        font-family: 'Lato', Helvetica, sans-serif;
-      }
-      .container {
-        max-width: 600px;
-        margin: 0 auto;
-        background: #ffffff;
-        border-radius: 12px;
-        overflow: hidden;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-      }
-      .content {
-        text-align: center;
-        padding: 35px 25px;
-      }
-      .content img {
-        width: 280px;
-        max-width: 90%;
-        margin-bottom: 25px;
-      }
-      .content h1 {
-        font-size: 26px;
-        color: #2B2A35;
-        margin-bottom: 15px;
-      }
-      .content p {
-        font-size: 16px;
-        color: #545465;
-        line-height: 26px;
-        margin: 10px 0;
-      }
-      .btn {
-        display: inline-block;
-        background-color: #4C5FE0;
-        color: #fff;
-        font-size: 16px;
-        font-weight: bold;
-        text-decoration: none;
-        padding: 14px 30px;
-        border-radius: 8px;
-        margin-top: 25px;
-      }
-      .footer {
-        text-align: center;
-        font-size: 13px;
-        color: #939DA8;
-        padding: 25px;
-        line-height: 20px;
-      }
-      .footer a {
-        color: #939DA8;
-        text-decoration: underline;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="container">
-      <!-- Content -->
-      <div class="content">
-        <img src="./imgs/welcomemail.png" alt="Welcome Illustration">
-        <h1>Your Email is Verified! 🎉</h1>
-        <p>Welcome aboard, <strong>{{user_name}}</strong>! You’re now officially part of the <strong>SkillBridge</strong> community.</p>
-        <p>Start exploring courses, build your profile, and unlock opportunities that match your skills.</p>
-        <a href="{{dashboard_link}}" class="btn">Go to Dashboard</a>
-        <p style="font-size: 13px; color: #939DA8; margin-top: 20px;">Need help? Our team is just an email away at <a href="mailto:support@skillbridge.com">support@skillbridge.com</a>.</p>
-      </div>
-      <!-- Footer -->
-      <div class="footer">
-        <p>&copy; 2025 SkillBridge Inc. All rights reserved.<br>
-        Location Here, India<br>
-        <a href="mailto:support@skillbridge.com">support@skillbridge.com</a> | <a href="#">Privacy Policy</a></p>
-      </div>
-    </div>
-  </body>
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    /* Navigation bar container */
+    ul.navbar {
+      list-style-type: none;
+      margin: 0;
+      padding: 0;
+      background-color: #333;
+      overflow: hidden;
+    }
+
+    /* Each item */
+    .navbar li {
+      float: left;
+    }
+
+    /* Each link */
+    .navbar li a {
+      display: block;
+      color: white;
+      text-align: center;
+      padding: 14px 20px;
+      text-decoration: none;
+    }
+
+    /* Hover effect */
+    .navbar li a:hover {
+      background-color: #555;
+    }
+
+    /* Active link */
+    .active {
+      background-color: #111;
+    }
+  </style>
+</head>
+
+<body>
+
+<ul class="navbar">
+  <li><a class="active" href="#">Home</a></li>
+  <li><a href="#">About</a></li>
+  <li><a href="#">Services</a></li>
+  <li><a href="#">Portfolio</a></li>
+  <li><a href="#">Contact</a></li>
+</ul>
+
+</body>
 </html>

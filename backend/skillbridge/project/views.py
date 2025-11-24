@@ -6,7 +6,16 @@ import logging
 from accounts.models import ClientCompany,Profile
 from .models import FreelanceProject
 from .serializer import FreelanceProjectSerializer
+from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+from .models import FreelanceProject
+from .serializer import FreelanceProjectSerializer
+import logging
 
+logger = logging.getLogger(__name__)
 logger = logging.getLogger(__name__)
 
 
@@ -75,17 +84,66 @@ class FreelanceProjectDetailView(APIView):
             return Response({'error': 'Project not found.'}, status=status.HTTP_404_NOT_FOUND)
 
 
+
 class FreelanceProjectListView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
         try:
-            projects = FreelanceProject.objects.filter(is_open=True).order_by('-created_at')
-            serializer = FreelanceProjectSerializer(projects, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            # Only freelancers should get ranked recommendations
+            if request.user.role != "freelancer":
+                projects = FreelanceProject.objects.filter(is_open=True)
+                serializer = FreelanceProjectSerializer(projects, many=True)
+                return Response(serializer.data, status=200)
+
+            profile = request.user.profile
+
+            # Combine freelancer profile text
+            profile_text = " ".join([
+                profile.skills or "",
+                profile.experience_level or "",
+                profile.bio or "",
+                profile.portfolio_links or ""
+            ])
+
+            # Fetch open projects
+            projects = FreelanceProject.objects.filter(is_open=True)
+
+            # Build project text list
+            project_texts = []
+            for proj in projects:
+                text = " ".join([
+                    proj.title or "",
+                    proj.description or "",
+                    getattr(proj, "required_skills", "") or ""
+                ])
+                project_texts.append(text)
+
+            # Apply TF-IDF
+            vectorizer = TfidfVectorizer()
+            vectors = vectorizer.fit_transform([profile_text] + project_texts)
+
+            # Compute cosine similarity
+            similarity_scores = cosine_similarity(vectors[0:1], vectors[1:]).flatten()
+
+            # Sort projects by similarity
+            ranked_projects = [
+                proj for _, proj in sorted(
+                    zip(similarity_scores, projects),
+                    key=lambda x: x[0],
+                    reverse=True
+                )
+            ]
+
+            serializer = FreelanceProjectSerializer(ranked_projects, many=True)
+            return Response(serializer.data, status=200)
+
         except Exception as e:
-            logger.exception(f"Unexpected error in FreelanceProjectListView: {str(e)}")
-            return Response({'error': 'Unexpected error occurred', 'details': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            logger.exception(f"Error ranking projects: {str(e)}")
+            return Response(
+                {"error": "Unexpected error occurred", "details": str(e)},
+                status=500
+            )
 
 
 class FreelanceProjectDeleteView(APIView):
