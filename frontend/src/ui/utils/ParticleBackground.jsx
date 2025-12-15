@@ -201,7 +201,7 @@ const ParticleBackground = ({
   ]);
 
   // zIndex based on layer choice; pointer-events none so it never blocks clicks.
-  const zIndex = layer === "overlay" ? 40 : 0;
+  const zIndex = layer === "overlay" ? 40 : -1;
 
   return (
     <div

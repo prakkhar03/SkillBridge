@@ -2,63 +2,45 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { authAPI } from '../services/api';
 import { Link } from 'react-router-dom';
-// import VerificationStatusDisplay from '../components/VerificationStatusDisplay';
-import { 
-  FaUserEdit, 
-  FaEye, 
-  FaCheckCircle, 
-  FaClock, 
-  FaExclamationTriangle,
+import { BentoGrid, BentoGridItem } from '../ui/layout/BentoGrid';
+import ScrollReveal from '../ui/utils/ScrollReveal';
+import {
+  FaUserEdit,
+  FaCheckCircle,
   FaChartLine,
   FaTrophy,
-  FaFileAlt,
-  FaStar,
   FaSearch,
   FaBriefcase,
-  FaPlay
+  FaRocket,
+  FaCode
 } from 'react-icons/fa';
 
-const colors = {
-  background: "#DFE0E2",
-  muted: "#B8BCC3",
-  accent: "#787A84",
-  success: "#10B981",
-  warning: "#F59E0B",
-  danger: "#EF4444",
-  info: "#3B82F6"
-};
-
-// const OnboardingStep = ({ step, title, description, status, isActive, isCompleted }) => (
 const OnboardingStep = ({ step, title, description, isActive, isCompleted }) => (
-  <div className={`flex items-start space-x-3 p-4 rounded-lg border ${
-    isActive ? 'border-blue-300 bg-blue-50' : 
-    isCompleted ? 'border-green-300 bg-green-50' : 
-    'border-gray-200 bg-gray-50'
-  }`}>
-    <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
-      isCompleted ? 'bg-green-500 text-white' :
-      isActive ? 'bg-blue-500 text-white' :
-      'bg-gray-300 text-gray-600'
+  <div className={`flex items-start space-x-3 p-4 rounded-lg border transition-all duration-300 ${isActive ? 'border-cyan-500/50 bg-cyan-500/10' :
+      isCompleted ? 'border-green-500/50 bg-green-500/10' :
+        'border-white/10 bg-white/5'
     }`}>
+    <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center shadow-lg ${isCompleted ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white' :
+        isActive ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white' :
+          'bg-gray-700 text-gray-400'
+      }`}>
       {isCompleted ? (
-        <FaCheckCircle className="w-5 h-5" />
+        <FaCheckCircle className="w-4 h-4" />
       ) : (
-        <span className="text-sm font-semibold">{step}</span>
+        <span className="text-sm font-bold">{step}</span>
       )}
     </div>
     <div className="flex-1">
-      <h3 className={`font-semibold ${
-        isActive ? 'text-blue-900' :
-        isCompleted ? 'text-green-900' :
-        'text-gray-700'
-      }`}>
+      <h3 className={`font-semibold ${isActive ? 'text-cyan-400' :
+          isCompleted ? 'text-green-400' :
+            'text-gray-400'
+        }`}>
         {title}
       </h3>
-      <p className={`text-sm ${
-        isActive ? 'text-blue-700' :
-        isCompleted ? 'text-green-700' :
-        'text-gray-600'
-      }`}>
+      <p className={`text-xs ${isActive ? 'text-cyan-300/80' :
+          isCompleted ? 'text-green-300/80' :
+            'text-gray-500'
+        }`}>
         {description}
       </p>
     </div>
@@ -68,31 +50,33 @@ const OnboardingStep = ({ step, title, description, isActive, isCompleted }) => 
 const VerificationStatus = ({ status, rating }) => {
   const getStatusColor = (status) => {
     switch (status) {
-      case 'Expert': return { bg: 'bg-purple-100', text: 'text-purple-800', border: 'border-purple-300' };
-      case 'Intermediate': return { bg: 'bg-blue-100', text: 'text-blue-800', border: 'border-blue-300' };
-      case 'Beginner': return { bg: 'bg-green-100', text: 'text-green-800', border: 'border-green-300' };
-      default: return { bg: 'bg-gray-100', text: 'text-gray-800', border: 'border-gray-300' };
+      case 'Expert': return { bg: 'bg-purple-500/20', text: 'text-purple-400', border: 'border-purple-500/50' };
+      case 'Intermediate': return { bg: 'bg-cyan-500/20', text: 'text-cyan-400', border: 'border-cyan-500/50' };
+      case 'Beginner': return { bg: 'bg-green-500/20', text: 'text-green-400', border: 'border-green-500/50' };
+      default: return { bg: 'bg-gray-500/10', text: 'text-gray-400', border: 'border-gray-500/20' };
     }
   };
 
   const statusColors = getStatusColor(status);
 
   return (
-    <div className={`p-4 rounded-lg border ${statusColors.bg} ${statusColors.border}`}>
-      <div className="flex items-center justify-between mb-2">
+    <div className={`p-4 rounded-lg border ${statusColors.bg} ${statusColors.border} backdrop-blur-sm h-full flex flex-col justify-center`}>
+      <div className="flex items-center justify-between mb-4">
         <h3 className={`font-semibold ${statusColors.text}`}>Verification Status</h3>
-        <FaTrophy className={`w-5 h-5 ${statusColors.text}`} />
+        <FaTrophy className={`w-6 h-6 ${statusColors.text}`} />
       </div>
-      <div className="space-y-2">
+      <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <span className={`text-sm ${statusColors.text}`}>Level:</span>
-          <span className={`font-semibold ${statusColors.text}`}>{status}</span>
+          <span className={`text-sm ${statusColors.text} opacity-80`}>Level:</span>
+          <span className={`font-bold text-lg ${statusColors.text}`}>{status}</span>
+        </div>
+        <div className="w-full bg-gray-700 h-2 rounded-full overflow-hidden">
+          <div className={`h-full ${statusColors.text.replace('text', 'bg')} opacity-80`} style={{ width: `${(rating / 5) * 100}%` }}></div>
         </div>
         <div className="flex items-center justify-between">
-          <span className={`text-sm ${statusColors.text}`}>Rating:</span>
+          <span className={`text-sm ${statusColors.text} opacity-80`}>Rating:</span>
           <div className="flex items-center space-x-1">
-            <FaStar className="w-4 h-4 text-yellow-500" />
-            <span className={`font-semibold ${statusColors.text}`}>{rating}/5.0</span>
+            <span className={`font-bold ${statusColors.text}`}>{rating}/5.0</span>
           </div>
         </div>
       </div>
@@ -105,66 +89,33 @@ export default function FreelancerDashboard() {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [onboardingStage, setOnboardingStage] = useState(0);
-  
-  console.log('FreelancerDashboard: Render - user:', user, 'isAuthenticated:', isAuthenticated);
-  
-  // Add error boundary
-  try {
-    console.log('FreelancerDashboard: Component rendering successfully');
-  } catch (error) {
-    console.error('FreelancerDashboard: Error during render:', error);
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-red-50">
-        <div className="text-center">
-          <p className="text-red-600 text-lg">Error rendering dashboard</p>
-          <p className="text-gray-600 mt-2">{error.message}</p>
-        </div>
-      </div>
-    );
-  }
 
   useEffect(() => {
-    console.log('FreelancerDashboard: useEffect triggered - isAuthenticated:', isAuthenticated);
     if (isAuthenticated) {
-      console.log('FreelancerDashboard: User authenticated, fetching profile...');
       fetchProfile();
-      
-      // Add a timeout to prevent infinite loading
       const timeoutId = setTimeout(() => {
         if (loading) {
-          console.log('FreelancerDashboard: Profile fetch timeout, setting default data');
           setLoading(false);
           setProfile({});
           setOnboardingStage(0);
         }
-      }, 10000); // 10 second timeout
-      
+      }, 10000);
       return () => clearTimeout(timeoutId);
-    } else {
-      console.log('FreelancerDashboard: User not authenticated yet');
     }
   }, [isAuthenticated, loading]);
 
   const fetchProfile = async () => {
     try {
-      console.log('FreelancerDashboard: Fetching profile...');
       const response = await authAPI.getProfile();
-      console.log('FreelancerDashboard: Profile response:', response);
-      
       if (response.ok) {
         const profileData = await response.json();
-        console.log('FreelancerDashboard: Profile data:', profileData);
         setProfile(profileData);
         setOnboardingStage(profileData.user?.onboarding_stage || 0);
       } else {
-        console.warn('FreelancerDashboard: Profile fetch failed with status:', response.status);
-        // Set default profile data to prevent loading state
         setProfile({});
         setOnboardingStage(0);
       }
     } catch (error) {
-      console.error('FreelancerDashboard: Error fetching profile:', error);
-      // Set default profile data to prevent loading state
       setProfile({});
       setOnboardingStage(0);
     } finally {
@@ -172,306 +123,189 @@ export default function FreelancerDashboard() {
     }
   };
 
-  const getOnboardingSteps = () => [
-    {
-      step: 1,
-      title: "Account Created",
-      description: "Your account has been successfully registered",
-      status: "completed"
-    },
-    {
-      step: 2,
-      title: "Email Verified",
-      description: "Verify your email address to continue",
-      status: onboardingStage >= 1 ? "completed" : "pending"
-    },
-    {
-      step: 3,
-      title: "Profile Completed",
-      description: "Fill out your professional profile",
-      status: onboardingStage >= 2 ? "completed" : "pending"
-    },
-    {
-      step: 4,
-      title: "Skills Assessment",
-      description: "Complete skills verification test",
-      status: onboardingStage >= 3 ? "completed" : "pending"
-    }
+  const steps = [
+    { step: 1, title: "Account Created", description: "Your account has been successfully registered", status: "completed" },
+    { step: 2, title: "Email Verified", description: "Verify your email address to continue", status: onboardingStage >= 1 ? "completed" : "pending" },
+    { step: 3, title: "Profile Completed", description: "Fill out your professional profile", status: onboardingStage >= 2 ? "completed" : "pending" },
+    { step: 4, title: "Skills Assessment", description: "Complete skills verification test", status: onboardingStage >= 3 ? "completed" : "pending" }
   ];
 
-  const steps = getOnboardingSteps();
   const currentStep = steps.findIndex(step => step.status === "pending") + 1;
   const progressPercentage = (onboardingStage / 3) * 100;
 
-  // Debug: Always show some content to test rendering
-  console.log('FreelancerDashboard: Rendering main content');
-  
-  if (!isAuthenticated) {
-    console.log('FreelancerDashboard: User not authenticated, showing auth required message');
-    return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: colors.background }}>
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto mb-4"></div>
-          <p className="text-red-600 text-lg">Authentication required</p>
-          <p className="text-gray-600 mt-2">Please log in to access your dashboard</p>
-        </div>
+  if (!isAuthenticated) return (
+    <div className="min-h-screen flex items-center justify-center bg-deep-violet">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-hot-pink mx-auto mb-4"></div>
+        <p className="text-hot-pink text-lg">Authentication required</p>
       </div>
-    );
-  }
+    </div>
+  );
 
-  if (loading) {
-    console.log('FreelancerDashboard: Still loading, showing loading message');
-    return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: colors.background }}>
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading your dashboard...</p>
-          <p className="text-sm text-gray-500 mt-2">This may take a few seconds...</p>
-        </div>
+  if (loading) return (
+    <div className="min-h-screen flex items-center justify-center bg-deep-violet">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-neon-cyan mx-auto mb-4"></div>
+        <p className="text-neon-cyan">Loading dashboard...</p>
       </div>
-    );
-  }
+    </div>
+  );
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: colors.background }}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+    <div className="min-h-screen bg-deep-violet text-white p-4 md:p-8 pt-24">
+      <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold mb-2" style={{ color: colors.accent }}>
-            Welcome back, {profile?.full_name || user?.email}!
-          </h1>
-          <p className="text-lg text-gray-600">
-            Complete your profile to start getting amazing projects
-          </p>
-        </div>
-
-        {/* Onboarding Progress */}
-        <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-gray-800">Onboarding Progress</h2>
-            <span className="text-sm text-gray-500">{Math.round(progressPercentage)}% Complete</span>
-          </div>
-          
-          {/* Progress Bar */}
-          <div className="w-full bg-gray-200 rounded-full h-3 mb-6">
-            <div 
-              className="bg-gradient-to-r from-blue-500 to-green-500 h-3 rounded-full transition-all duration-500"
-              style={{ width: `${progressPercentage}%` }}
-            ></div>
-          </div>
-
-          {/* Steps */}
-          <div className="space-y-4">
-            {steps.map((step, index) => (
-              <OnboardingStep
-                key={step.step}
-                step={step.step}
-                title={step.title}
-                description={step.description}
-                status={step.status}
-                isActive={step.status === "pending" && index === currentStep - 1}
-                isCompleted={step.status === "completed"}
-              />
-            ))}
-          </div>
-        </div>
-
-        {/* Main Actions Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                    {/* Profile Management */}
-          <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
-            <div className="flex items-center mb-4">
-              <FaUserEdit className="w-8 h-8 text-blue-600 mr-3" />
-              <h3 className="text-xl font-bold text-gray-800">Profile Management</h3>
-            </div>
-            <p className="text-gray-600 mb-4">
-              Create or update your professional profile to showcase your skills and experience.
+        <ScrollReveal>
+          <div className="mb-12">
+            <h1 className="text-5xl md:text-6xl font-bold mb-4">
+              Welcome back, <span className="aurora-text">{profile?.full_name || user?.email?.split('@')[0]}</span>
+            </h1>
+            <p className="text-xl text-gray-400 font-light">
+              Your command center for <span className="text-neon-cyan">projects</span>, <span className="text-electric-purple">skills</span>, and <span className="text-hot-pink">growth</span>.
             </p>
-            <div className="space-y-3">
-              <Link
-                to="/profile/edit"
-                className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center"
-                >
-                <FaUserEdit className="w-4 h-4 mr-2" />
-                Edit Profile
-              </Link>
-              <Link
-                to="/profile/view"
-                className="w-full border-2 border-gray-300 text-gray-700 py-3 px-4 rounded-lg hover:border-gray-400 hover:bg-gray-50 transition-colors flex items-center justify-center"
-                >
-                <FaEye className="w-4 h-4 mr-2" />
-                View Profile
-              </Link>
+          </div>
+        </ScrollReveal>
+
+        {/* Onboarding Progress - Full Width */}
+        <ScrollReveal delay={0.2}>
+          <div className="holo-card rounded-2xl p-8 mb-12">
+            <div className="flex flex-col md:flex-row items-center justify-between mb-8">
+              <div>
+                <h2 className="text-2xl font-bold text-white mb-1">Onboarding Progress</h2>
+                <p className="text-gray-400 text-sm">Complete these steps to unlock full potential</p>
+              </div>
+              <div className="flex items-center space-x-4 mt-4 md:mt-0">
+                <span className="text-3xl font-bold text-neon-cyan">{Math.round(progressPercentage)}%</span>
+                <div className="w-48 h-3 bg-gray-800 rounded-full overflow-hidden border border-white/10">
+                  <div
+                    className="h-full bg-gradient-to-r from-neon-cyan to-electric-purple transition-all duration-1000 ease-out shadow-[0_0_10px_rgba(0,240,255,0.5)]"
+                    style={{ width: `${progressPercentage}%` }}
+                  ></div>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {steps.map((step, index) => (
+                <OnboardingStep
+                  key={step.step}
+                  step={step.step}
+                  title={step.title}
+                  description={step.description}
+                  isActive={step.status === "pending" && index === currentStep - 1}
+                  isCompleted={step.status === "completed"}
+                />
+              ))}
             </div>
           </div>
+        </ScrollReveal>
 
-          {/* Project Discovery */}
-          <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
-            <div className="flex items-center mb-4">
-              <FaSearch className="w-8 h-8 text-green-600 mr-3" />
-              <h3 className="text-xl font-bold text-gray-800">Project Discovery</h3>
-            </div>
-            <p className="text-gray-600 mb-4">
-              Browse available projects and find opportunities that match your skills and experience.
-            </p>
-            <div className="space-y-3">
-              <Link
-                to="/projects"
-                className="w-full bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center"
-              >
-                <FaSearch className="w-4 h-4 mr-2" />
-                Browse Projects
-              </Link>
-              <Link
-                to="/projects/applied"
-                className="w-full border-2 border-gray-300 text-gray-700 py-3 px-4 rounded-lg hover:border-gray-400 hover:bg-gray-50 transition-colors flex items-center justify-center"
-              >
-                <FaBriefcase className="w-4 h-4 mr-2" />
-                My Applications
-              </Link>
-            </div>
-          </div>
-
-          {/* Verification Status */}
-          <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
-            <div className="flex items-center mb-4">
-              <FaTrophy className="w-8 h-8 text-yellow-600 mr-3" />
-              <h3 className="text-xl font-bold text-gray-800">Verification Status</h3>
-            </div>
-            <VerificationStatus 
-              status={profile?.verification_tag || "Unverified"} 
-              rating={profile?.star_rating || 0.0}
+        {/* Bento Grid Layout */}
+        <ScrollReveal delay={0.4}>
+          <BentoGrid className="mb-12">
+            {/* Profile Management - Large Item */}
+            <BentoGridItem
+              title="Profile Management"
+              description="Update your professional persona"
+              header={
+                <div className="flex flex-1 w-full h-full min-h-[8rem] rounded-xl bg-gradient-to-br from-electric-purple/20 to-deep-violet items-center justify-center group-hover:bg-electric-purple/30 transition-colors">
+                  <FaUserEdit className="w-16 h-16 text-electric-purple drop-shadow-[0_0_10px_rgba(112,0,255,0.5)]" />
+                </div>
+              }
+              className="md:col-span-1 holo-card border-none"
+              icon={<FaUserEdit className="h-4 w-4 text-gray-400" />}
+              onClick={() => { }}
             />
-          </div>
 
-          {/* Skills Verification */}
-          <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
-            <div className="flex items-center mb-4">
-              <FaTrophy className="w-8 h-8 text-purple-600 mr-3" />
-              <h3 className="text-xl font-bold text-gray-800">Skills Verification</h3>
-            </div>
-            <p className="text-gray-600 mb-4">
-              Get your skills verified to increase your credibility and access better opportunities.
-            </p>
-            <div className="space-y-3">
-              <Link
-                to="/verification/test"
-                className="w-full bg-purple-600 text-white py-3 px-4 rounded-lg hover:bg-purple-700 transition-colors flex items-center justify-center"
-              >
-                <FaPlay className="w-4 h-4 mr-2" />
-                Take Skills Test
-              </Link>
-              <Link
-                to="/verification/dashboard"
-                className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center"
-              >
-                <FaEye className="w-4 h-4 mr-2" />
-                View Status
-              </Link>
-            </div>
-          </div>
+            {/* Project Discovery - Large Item */}
+            <BentoGridItem
+              title="Project Discovery"
+              description="Find your next big opportunity"
+              header={
+                <div className="flex flex-1 w-full h-full min-h-[8rem] rounded-xl bg-gradient-to-br from-neon-cyan/20 to-deep-violet items-center justify-center group-hover:bg-neon-cyan/30 transition-colors">
+                  <FaSearch className="w-16 h-16 text-neon-cyan drop-shadow-[0_0_10px_rgba(0,240,255,0.5)]" />
+                </div>
+              }
+              className="md:col-span-1 holo-card border-none"
+              icon={<FaSearch className="h-4 w-4 text-gray-400" />}
+            />
 
-          {/* Quick Stats */}
-          <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
-            <div className="flex items-center mb-4">
-              <FaChartLine className="w-8 h-8 text-green-600 mr-3" />
-              <h3 className="text-xl font-bold text-gray-800">Quick Stats</h3>
-            </div>
-            <div className="space-y-3">
-              <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                <span className="text-gray-600">Profile Completion</span>
-                <span className="font-semibold text-gray-800">{Math.round(progressPercentage)}%</span>
-              </div>
-              <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                <span className="text-gray-600">Skills Listed</span>
-                <span className="font-semibold text-gray-800">
-                  {profile?.skills ? profile.skills.split(',').length : 0}
-                </span>
-              </div>
-              <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                <span className="text-gray-600">Experience Level</span>
-                <span className="font-semibold text-gray-800">
-                  {profile?.experience_level || "Not Set"}
-                </span>
-              </div>
-              <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                <span className="text-gray-600">Projects Applied</span>
-                <span className="font-semibold text-gray-800">
-                  {/* TODO: Add API call to get applied projects count */}
-                  0
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
+            {/* Verification Status - Vertical Item */}
+            <BentoGridItem
+              title="Verification"
+              description="Your current skill standing"
+              header={
+                <VerificationStatus
+                  status={profile?.verification_tag || "Unverified"}
+                  rating={profile?.star_rating || 0.0}
+                />
+              }
+              className="md:col-span-1 md:row-span-2 holo-card border-none"
+              icon={<FaTrophy className="h-4 w-4 text-gray-400" />}
+            />
 
-        {/* Recent Activity & Next Steps */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Next Steps */}
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
-              <FaExclamationTriangle className="w-5 h-5 text-orange-500 mr-2" />
-              Next Steps
-            </h3>
-            <div className="space-y-3">
-              {onboardingStage < 1 && (
-                <div className="flex items-center p-3 bg-orange-50 rounded-lg border border-orange-200">
-                  <FaClock className="w-4 h-4 text-orange-500 mr-3" />
-                  <span className="text-orange-700">Verify your email address to continue</span>
+            {/* Quick Stats - Horizontal Item */}
+            <BentoGridItem
+              title="Quick Stats"
+              description="At a glance overview"
+              header={
+                <div className="grid grid-cols-2 gap-3 w-full h-full">
+                  <div className="bg-white/5 p-4 rounded-xl text-center border border-white/5 hover:border-neon-cyan/30 transition-colors">
+                    <div className="text-3xl font-bold text-neon-cyan">{profile?.skills ? profile.skills.split(',').length : 0}</div>
+                    <div className="text-xs text-gray-400 uppercase tracking-wider mt-1">Skills</div>
+                  </div>
+                  <div className="bg-white/5 p-4 rounded-xl text-center border border-white/5 hover:border-hot-pink/30 transition-colors">
+                    <div className="text-3xl font-bold text-hot-pink">0</div>
+                    <div className="text-xs text-gray-400 uppercase tracking-wider mt-1">Applied</div>
+                  </div>
+                  <div className="bg-white/5 p-4 rounded-xl text-center col-span-2 border border-white/5 hover:border-electric-purple/30 transition-colors flex flex-col justify-center">
+                    <div className="text-xl font-bold text-electric-purple">{profile?.experience_level || "N/A"}</div>
+                    <div className="text-xs text-gray-400 uppercase tracking-wider mt-1">Experience Level</div>
+                  </div>
                 </div>
-              )}
-              {onboardingStage >= 1 && onboardingStage < 2 && (
-                <div className="flex items-center p-3 bg-blue-50 rounded-lg border border-blue-200">
-                  <FaUserEdit className="w-4 h-4 text-blue-500 mr-3" />
-                  <span className="text-blue-700">Complete your professional profile</span>
-                </div>
-              )}
-              {onboardingStage >= 2 && onboardingStage < 3 && (
-                <div className="flex items-center p-3 bg-purple-50 rounded-lg border border-purple-200">
-                  <FaFileAlt className="w-4 h-4 text-purple-500 mr-3" />
-                  <span className="text-purple-700">Take the skills assessment test</span>
-                </div>
-              )}
-              {onboardingStage >= 3 && (
-                <div className="flex items-center p-3 bg-green-50 rounded-lg border border-green-200">
-                  <FaCheckCircle className="w-4 h-4 text-green-500 mr-3" />
-                  <span className="text-green-700">You're all set! Start applying to projects</span>
-                </div>
-              )}
-            </div>
-          </div>
+              }
+              className="md:col-span-1 holo-card border-none"
+              icon={<FaChartLine className="h-4 w-4 text-gray-400" />}
+            />
 
-          {/* Profile Summary */}
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <h3 className="text-xl font-bold text-gray-800 mb-4">Profile Summary</h3>
-            <div className="space-y-3">
-              <div className="flex justify-between">
-                <span className="text-gray-600">Full Name:</span>
-                <span className="font-medium text-gray-800">
-                  {profile?.full_name || "Not Set"}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Location:</span>
-                <span className="font-medium text-gray-800">
-                  {profile?.location || "Not Set"}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Bio:</span>
-                <span className="font-medium text-gray-800">
-                  {profile?.bio ? (profile.bio.length > 30 ? profile.bio.substring(0, 30) + "..." : profile.bio) : "Not Set"}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Resume:</span>
-                <span className="font-medium text-gray-800">
-                  {profile?.resume ? "Uploaded" : "Not Uploaded"}
-                </span>
-              </div>
-            </div>
+            {/* Skills Verification */}
+            <BentoGridItem
+              title="Skill Test"
+              description="Prove your expertise"
+              header={
+                <div className="flex flex-1 w-full h-full min-h-[8rem] rounded-xl bg-gradient-to-br from-hot-pink/20 to-deep-violet items-center justify-center relative overflow-hidden group">
+                  <div className="absolute inset-0 bg-hot-pink/20 blur-2xl group-hover:blur-3xl transition-all opacity-50"></div>
+                  <FaRocket className="w-12 h-12 text-hot-pink relative z-10 drop-shadow-[0_0_15px_rgba(255,0,153,0.6)] group-hover:scale-110 transition-transform duration-300" />
+                </div>
+              }
+              className="md:col-span-1 holo-card border-none"
+              icon={<FaRocket className="h-4 w-4 text-gray-400" />}
+            />
+          </BentoGrid>
+        </ScrollReveal>
+
+        {/* Action Links */}
+        <ScrollReveal delay={0.6}>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
+            <Link to="/profile/edit" className="glass-pill p-6 flex flex-col items-center justify-center text-center group hover:bg-white/5 transition-all">
+              <FaUserEdit className="w-8 h-8 mb-3 text-electric-purple group-hover:scale-110 transition-transform" />
+              <span className="text-sm font-bold tracking-wide">EDIT PROFILE</span>
+            </Link>
+            <Link to="/projects" className="glass-pill p-6 flex flex-col items-center justify-center text-center group hover:bg-white/5 transition-all">
+              <FaSearch className="w-8 h-8 mb-3 text-neon-cyan group-hover:scale-110 transition-transform" />
+              <span className="text-sm font-bold tracking-wide">BROWSE JOBS</span>
+            </Link>
+            <Link to="/verification/test" className="glass-pill p-6 flex flex-col items-center justify-center text-center group hover:bg-white/5 transition-all">
+              <FaCode className="w-8 h-8 mb-3 text-hot-pink group-hover:scale-110 transition-transform" />
+              <span className="text-sm font-bold tracking-wide">SKILL TEST</span>
+            </Link>
+            <Link to="/projects/applied" className="glass-pill p-6 flex flex-col items-center justify-center text-center group hover:bg-white/5 transition-all">
+              <FaBriefcase className="w-8 h-8 mb-3 text-white group-hover:scale-110 transition-transform" />
+              <span className="text-sm font-bold tracking-wide">APPLICATIONS</span>
+            </Link>
           </div>
-        </div>
+        </ScrollReveal>
+
       </div>
     </div>
   );

@@ -28,42 +28,51 @@ const LocationIcon = () => (
 export const Footer = () => {
   // Main Footer Component
   return (
-    <footer className="text-gray-700 font-sans max-w-7xl mx-auto px-4 sm:px-6 py-10 md:py-16">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex flex-col md:flex-row justify-between items-center gap-6 mb-6">
+    <footer className="relative z-10 border-t border-white/10 bg-deep-violet/80 backdrop-blur-md">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="flex flex-col md:flex-row justify-between items-center gap-8 mb-8">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-          <img src="/src/assets/skillbridgelogo.png" alt="SkillBridge logo" className="h-9 w-9 rounded-md object-cover" />
-          <span className="text-lg font-bold tracking-wide" style={{ color: "#787A84" }}>
-            SkillBridge
-          </span>
-        </Link>
+          <Link to="/" className="flex items-center gap-3 group">
+            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-neon-cyan to-electric-purple p-0.5">
+              <div className="w-full h-full bg-deep-violet rounded-[7px] flex items-center justify-center">
+                <span className="text-xl font-bold text-white">S</span>
+              </div>
+            </div>
+            <span className="text-xl font-bold text-white tracking-wide group-hover:text-neon-cyan transition-colors">
+              SkillBridge
+            </span>
+          </Link>
 
           {/* Navigation Links */}
-          <nav className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm font-medium order-first md:order-none">
-            <a href="#" className="text-gray-600 hover:text-blue-600 transition-colors">
+          <nav className="flex flex-wrap justify-center gap-x-8 gap-y-4 text-sm font-medium">
+            <a href="#" className="text-gray-400 hover:text-neon-cyan transition-colors">
               Privacy Policy
             </a>
-            <a href="#" className="text-gray-600 hover:text-blue-600 transition-colors">
-              Terms & Condition
+            <a href="#" className="text-gray-400 hover:text-neon-cyan transition-colors">
+              Terms & Conditions
+            </a>
+            <a href="#" className="text-gray-400 hover:text-neon-cyan transition-colors">
+              Support
             </a>
           </nav>
-          <div className="flex items-center gap-4 text-gray-500">
-            <a href="#" aria-label="X" className="hover:text-blue-400 transition-colors text-2xl">
+
+          {/* Social Icons */}
+          <div className="flex items-center gap-6">
+            <a href="#" aria-label="X" className="text-gray-400 hover:text-white hover:scale-110 transition-all text-xl">
               <FaSquareXTwitter />
             </a>
-            <a href="#" aria-label="LinkedIn" className="hover:text-blue-700 transition-colors text-2xl">
+            <a href="#" aria-label="LinkedIn" className="text-gray-400 hover:text-neon-cyan hover:scale-110 transition-all text-xl">
               <FaLinkedin />
             </a>
-            <a href="#" aria-label="InstaGram" className="hover:text-red-600 transition-colors text-2xl">
+            <a href="#" aria-label="Instagram" className="text-gray-400 hover:text-hot-pink hover:scale-110 transition-all text-xl">
               <FaInstagram />
             </a>
           </div>
         </div>
-        <hr className="border-t border-gray-600" />
-        <div className="flex flex-col md:flex-row justify-between items-center text-center md:text-left gap-4 text-sm text-gray-500 mt-6">
+
+        <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-gray-500">
           <p>&copy; 2025 SkillBridge. All rights reserved.</p>
-          <div className="flex justify-center items-center gap-2">
+          <div className="flex items-center gap-2 text-gray-400">
             <LocationIcon />
             <span>ABES Engineering College, Ghaziabad</span>
           </div>

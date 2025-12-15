@@ -34,28 +34,13 @@ export default function SmoothScroll({ children }) {
     // Keep ScrollTrigger in sync with Lenis
     lenis.on("scroll", ScrollTrigger.update);
 
-    // Use a wrapper element if present, otherwise fall back to document.scrollingElement
-    // (Wrap children with <div id="lenis-wrapper"> in this component return to use wrapper)
-    const wrapper = document.querySelector("#lenis-wrapper") || document.scrollingElement || document.body;
-
-    // Scroller proxy for ScrollTrigger
-    ScrollTrigger.scrollerProxy(wrapper, {
+    // Use document.body as the scroller proxy target for window scrolling
+    ScrollTrigger.scrollerProxy(document.body, {
       scrollTop(value) {
-        if (!arguments.length) {
-          // getter
-          return lenisRef.current ? lenisRef.current.scroll : window.scrollY || 0;
+        if (arguments.length) {
+          lenis.scrollTo(value, { immediate: true });
         }
-        // setter - make immediate jump to avoid animating - used by ScrollTrigger
-        if (lenisRef.current) {
-          try {
-            lenisRef.current.scrollTo(value, { immediate: true });
-          } catch {
-            // fallback if API differs
-            try { lenisRef.current.scrollTo(value); } catch {}
-          }
-        } else {
-          window.scrollTo(0, value);
-        }
+        return lenis.scroll;
       },
       getBoundingClientRect() {
         return {
@@ -65,16 +50,12 @@ export default function SmoothScroll({ children }) {
           height: window.innerHeight,
         };
       },
-      // pinType should be "transform" when using Lenis (transform-based) else fallback
-      pinType: wrapper.style?.transform ? "transform" : "fixed",
     });
 
     // Handler reference (so we can remove it on cleanup)
     const refreshHandler = () => {
-      if (lenisRef.current && typeof lenisRef.current.raf === "function") {
-        // trigger a frame so Lenis recalculates sizes
-        lenisRef.current.raf(performance.now());
-      }
+      // trigger a frame so Lenis recalculates sizes
+      lenis.raf(performance.now());
     };
     refreshHandlerRef.current = refreshHandler;
 
@@ -90,30 +71,18 @@ export default function SmoothScroll({ children }) {
       if (rafIdRef.current) cancelAnimationFrame(rafIdRef.current);
 
       // remove scroll listener
-      if (lenisRef.current) {
-        try {
-          lenisRef.current.off?.("scroll", ScrollTrigger.update);
-        } catch {}
-      }
+      lenis.off("scroll", ScrollTrigger.update);
 
       // remove refresh handler
-      try {
-        if (refreshHandlerRef.current) ScrollTrigger.removeEventListener("refresh", refreshHandlerRef.current);
-      } catch {}
+      ScrollTrigger.removeEventListener("refresh", refreshHandler);
 
       // restore defaults (defensive)
       try {
         ScrollTrigger.defaults({ scroller: window });
-      } catch {}
+      } catch { }
 
       // destroy lenis if API available
-      try {
-        if (lenisRef.current && typeof lenisRef.current.destroy === "function") {
-          lenisRef.current.destroy();
-        }
-      } catch (e) {
-        console.warn("Lenis destroy failed:", e);
-      }
+      lenis.destroy();
 
       // unset window reference
       if (typeof window !== "undefined") window.__lenis = null;
@@ -124,7 +93,5 @@ export default function SmoothScroll({ children }) {
     };
   }, []);
 
-  // IMPORTANT: wrap children with an element with id "lenis-wrapper" so scrollerProxy can target it.
-  // This helps ScrollTrigger and pinning behave consistently.
-  return <div id="lenis-wrapper">{children}</div>;
+  return <>{children}</>;
 }

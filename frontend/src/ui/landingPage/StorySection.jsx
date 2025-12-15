@@ -21,35 +21,21 @@ const iconMap = {
 };
 
 const FeatureCard = ({ title, description, icon }) => (
-  <div className="relative w-full h-full rounded-xl overflow-hidden border border-white/10"
-    style={{
-      // stronger, more opaque gradient background
-      background: "linear-gradient(to bottom, rgba(255,255,255,0.15), rgba(255,255,255,0.05))",
-      boxShadow: "0 10px 30px rgba(0,0,0,0.35)"
-    }}>
+  <div className="holo-card w-full h-full rounded-xl p-6 md:p-8 flex flex-col justify-end group">
     {/* big icon top-left */}
-    <div className="absolute top-6 left-6 z-10 text-pink-400 opacity-95 select-none pointer-events-none"
-         style={{ fontSize: 'clamp(44px, 6.5vw, 100px)', lineHeight: 1 }}>
+    <div className="absolute top-6 left-6 z-10 text-hot-pink opacity-80 group-hover:opacity-100 transition-opacity duration-300 select-none pointer-events-none"
+      style={{ fontSize: 'clamp(44px, 6.5vw, 100px)', lineHeight: 1 }}>
       {icon}
     </div>
 
-    {/* subtle frame / inner padding */}
-    <div className="absolute inset-0 p-6 md:p-8 flex flex-col justify-end">
-      <h3 className="text-2xl md:text-3xl lg:text-4xl font-extrabold text-white leading-tight mb-3">
+    <div className="relative z-20">
+      <h3 className="text-2xl md:text-3xl lg:text-4xl font-extrabold text-white leading-tight mb-3 group-hover:text-neon-cyan transition-colors">
         {title}
       </h3>
-      <p className="text-base md:text-lg lg:text-xl text-gray-300 leading-relaxed"
-          style={{
-            maxHeight: "48vh",   
-            overflowY: "auto",
-            paddingRight: "6px", 
-          }}>
+      <p className="text-base md:text-lg lg:text-xl text-gray-300 leading-relaxed max-h-[48vh] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-electric-purple scrollbar-track-transparent">
         {description}
       </p>
     </div>
-
-    {/* faint border inside for the aesthetic from screenshot */}
-    <div className="absolute inset-2 rounded-md pointer-events-none " style={{ border: '1px solid rgba(255,255,255,0.04)', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)' }} />
   </div>
 );
 
@@ -110,11 +96,11 @@ export default function StorySection() {
         duration: scene1.exitDuration,
         ease: 'power2.inOut'
       })
-      .to('.scene-2-content', {
-        opacity: 1,
-        duration: scene1.exitDuration,
-        ease: 'power2.inOut'
-      }, '<');
+        .to('.scene-2-content', {
+          opacity: 1,
+          duration: scene1.exitDuration,
+          ease: 'power2.inOut'
+        }, '<');
 
       // ---------------------
       // Scene 2
@@ -133,12 +119,12 @@ export default function StorySection() {
         duration: scene2.titleDuration,
         ease: 'power3.out'
       })
-      .from('.cibil-meter', {
-        scale: 0.82,
-        opacity: 0,
-        duration: scene2.meterDuration,
-        ease: 'elastic.out(1, 0.5)'
-      }, '-=0.6');
+        .from('.cibil-meter', {
+          scale: 0.82,
+          opacity: 0,
+          duration: scene2.meterDuration,
+          ease: 'elastic.out(1, 0.5)'
+        }, '-=0.6');
 
       tl.to(
         { value: 0 },
@@ -179,14 +165,14 @@ export default function StorySection() {
         duration: 1.0,
         ease: 'power2.inOut'
       })
-      .set('.scene-3-content', { opacity: 1 })
-      .from('.features-intro-title, .features-intro-subtitle', {
-        opacity: 0,
-        y: 50,
-        stagger: 0.5,
-        duration: 1.5,
-        ease: 'power3.out'
-      });
+        .set('.scene-3-content', { opacity: 1 })
+        .from('.features-intro-title, .features-intro-subtitle', {
+          opacity: 0,
+          y: 50,
+          stagger: 0.5,
+          duration: 1.5,
+          ease: 'power3.out'
+        });
 
       tl.to({}, { duration: 0.6 });
 
@@ -296,7 +282,7 @@ export default function StorySection() {
   }, []);
 
   return (
-    <section id="story-section" ref={main} className="relative text-white overflow-hidden">
+    <section id="story-section" ref={main} className="relative z-10 text-white overflow-hidden">
       <div className="relative h-screen">
         {/* Scene 1 */}
         <div className="scene-1-content absolute inset-0 flex flex-col md:flex-row items-center justify-center gap-8 md:gap-16">
@@ -308,7 +294,7 @@ export default function StorySection() {
         </div>
 
         {/* Scene 2 */}
-        <div className="scene-2-content absolute inset-0 flex flex-col items-center justify-center gap-8 opacity-0">
+        <div className="scene-2-content absolute inset-0 flex flex-col items-center justify-center gap-8">
           <div className="text-center">
             <h2 className="vision-title text-5xl md:text-6xl font-bold">Our Vision</h2>
             <p className="vision-subtitle text-lg text-gray-400 mt-2">The CIBIL Score for Skills.</p>
@@ -334,7 +320,7 @@ export default function StorySection() {
         </div>
 
         {/* Scene 3 */}
-        <div className="scene-3-content absolute inset-0 z-10 flex flex-col items-center justify-center text-center px-4 opacity-0">
+        <div className="scene-3-content absolute inset-0 z-10 flex flex-col items-center justify-center text-center px-4">
           <h1 className="features-intro-title text-4xl md:text-5xl font-bold text-gray-300">A Smarter Way to Connect</h1>
           <p className="features-intro-subtitle mt-4 text-lg md:text-xl text-slate-400 max-w-3xl mx-auto">AI-powered matching and skill verification for trusted freelancer-client connections.</p>
         </div>
@@ -347,14 +333,14 @@ export default function StorySection() {
                 {features.slice(0, 6).map((feature) => {
                   const Icon = iconMap[feature.icon];
                   return (
-                    <div 
-                      key={feature.id} 
+                    <div
+                      key={feature.id}
                       className="feature-card-item flex-shrink-0 w-[280px] sm:w-[340px] md:w-[420px] lg:w-[520px] h-[480px] md:h-[640px] xl:h-[720px]"
                     >
-                      <FeatureCard 
-                        title={feature.title} 
-                        description={feature.description} 
-                        icon={Icon} 
+                      <FeatureCard
+                        title={feature.title}
+                        description={feature.description}
+                        icon={Icon}
                       />
                     </div>
                   );
