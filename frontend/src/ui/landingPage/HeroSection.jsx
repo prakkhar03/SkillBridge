@@ -1,151 +1,77 @@
-// src/ui/landingPage/HeroSection.jsx
-import React, { useRef } from "react";
 import { Link } from "react-router-dom";
+import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
-import { useGSAP } from "@gsap/react";
-import { SplitText } from "gsap/SplitText";
 
-// Register GSAP plugins
-gsap.registerPlugin(useGSAP, SplitText);
+export function HeroSection() {
+  const titleRef = useRef(null);
+  const subtitleRef = useRef(null);
+  const ctaRef = useRef(null);
 
-const SkillBridgeTitle = () => (
-  <h1
-    className="hero-title text-[80px] sm:text-[100px] font-bold tracking-wider
-      text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-white
-      [-webkit-text-stroke:1px_white] [paint-order:stroke_fill]"
-  >
-    SKILLBRIDGE
-  </h1>
-);
-
-export const HeroSection = () => {
-  const containerRef = useRef(null);
-  const splitInstance = useRef(null);
-// inside HeroSection (replace your useGSAP callback with this)
-
-useGSAP(() => {
-  if (typeof SplitText === "undefined") {
-    console.warn("SplitText plugin not available");
-    return;
-  }
-
-  try {
-    splitInstance.current = new SplitText(".hero-title", {
-      type: "chars",
-      charsClass: "hero-char",
-    });
-
-    const chars = splitInstance.current.chars;
-
-    gsap.set(chars, {
-      yPercent: -150,
-      xPercent: () => gsap.utils.random(-100, 100),
-      rotation: () => gsap.utils.random(-90, 90),
-      opacity: 0,
-    });
-
-    const tl = gsap.timeline();
-
-    // Title characters animation
-    tl.to(chars, {
-      duration: 1.5,
-      yPercent: 0,
-      xPercent: 0,
-      rotation: 0,
-      opacity: 1,
-      stagger: 0.05,
-      ease: "power3.inOut",
-    });
-
-    // subtitle/desc/buttons animation
-    tl.from(
-      ".hero-subtitle, .hero-description, .hero-buttons",
-      {
-        duration: 1,
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      gsap.from(titleRef.current, {
+        y: 100,
         opacity: 0,
-        y: 20,
-        stagger: 0.2,
-        ease: "power2.out",
-      },
-      "-=0.5"
-    );
-
-    // --- ORB: animate the global .orb element (use direct DOM lookup) ---
-    const animateOrbIfFound = () => {
-      const orbEl = document.querySelector(".orb");
-      if (!orbEl) return false;
-
-      tl.to(
-        orbEl,
-        {
-          duration: 1.2,
-          scale: 1,
-          autoAlpha: 1,
-          x: "0vw",   // final hero-position X (relative to ParallaxElement's origin)
-          y: "10vh",  // final hero-position Y
-          ease: "elastic.out(1, 0.75)",
-          overwrite: "auto",
-        },
-        "-=0.9"
-      );
-
-      return true;
-    };
-
-    // try immediate; otherwise try next frame (handles mount ordering)
-    if (!animateOrbIfFound()) {
-      // If the orb isn't mounted yet, try next paint—this is safe & simple
-      requestAnimationFrame(() => {
-        animateOrbIfFound();
+        duration: 1.2,
+        ease: "power4.out",
+        delay: 0.2,
       });
-    }
+      gsap.from(subtitleRef.current, {
+        y: 50,
+        opacity: 0,
+        duration: 1,
+        ease: "power3.out",
+        delay: 0.6,
+      });
+      gsap.from(ctaRef.current, {
+        scale: 0.8,
+        opacity: 0,
+        duration: 0.8,
+        ease: "back.out(1.7)",
+        delay: 1,
+      });
+    });
 
-  } catch (e) {
-    console.error("Animation error:", e);
-  }
-
-  return () => {
-    if (splitInstance.current) {
-      splitInstance.current.revert();
-    }
-  };
-}, { scope: containerRef });
-
+    return () => ctx.revert();
+  }, []);
 
   return (
-    <section
-      ref={containerRef}
-      className="w-full flex flex-col justify-center items-center text-center text-white p-4 overflow-hidden relative"
-      style={{
-        // Use the CSS variable set by navbar to calculate height
-        minHeight: "calc(100vh - var(--navbar-height, 0px))",
-        paddingTop: "clamp(1rem, 2vw, 1.5rem)",
-        paddingBottom: "clamp(1rem, 2vw, 1.5rem)",
-      }}
-    >
-      <div className="max-w-5xl mx-auto">
-        <p className="hero-subtitle text-lg sm:text-xl text-gray-400 mb-2">
-          Welcome to
+    <div className="relative min-h-screen flex flex-col items-center justify-center text-center px-4 overflow-hidden">
+      {/* Background Glow */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-purple-600/20 rounded-full blur-[120px] pointer-events-none"></div>
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-cyan-500/10 rounded-full blur-[80px] pointer-events-none mix-blend-screen"></div>
+
+      {/* Main Content */}
+      <div className="relative z-10 max-w-5xl mx-auto">
+        <h1 ref={titleRef} className="text-6xl md:text-8xl font-bold mb-6 tracking-tight leading-tight">
+          <span className="block text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]">
+            BRIDGE THE
+          </span>
+          <span className="aurora-text drop-shadow-[0_0_30px_rgba(0,240,255,0.4)]">
+            IMPOSSIBLE
+          </span>
+        </h1>
+
+        <p ref={subtitleRef} className="text-xl md:text-2xl text-gray-300 mb-10 max-w-2xl mx-auto font-light leading-relaxed">
+          Connect with elite talent and visionary projects in a <span className="text-cyan-300 font-medium">decentralized</span> ecosystem.
         </p>
-        <div className="my-4">
-          <SkillBridgeTitle />
-        </div>
-        <p className="hero-description text-base sm:text-lg text-gray-300 max-w-2xl mx-auto mb-8">
-          A new era of collaborative learning and professional growth. Connect,
-          learn, and build your future.
-        </p>
-        <div className="hero-buttons flex flex-col sm:flex-row justify-center items-center gap-4">
-          <Link
-            to="/auth"
-            className="w-full sm:w-auto px-8 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors"
-          >
-            Get Started
+
+        <div ref={ctaRef} className="flex flex-col sm:flex-row items-center justify-center gap-6">
+          <Link to="/auth" className="group relative px-8 py-4 bg-white text-black font-bold rounded-full overflow-hidden transition-transform hover:scale-105">
+            <div className="absolute inset-0 bg-gradient-to-r from-cyan-400 to-purple-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <span className="relative z-10 group-hover:text-white transition-colors">GET STARTED</span>
           </Link>
-          <button className="w-full sm:w-auto px-8 py-3 bg-transparent border border-gray-500 text-white rounded-lg font-semibold hover:bg-gray-800 transition-colors">
-            Learn More
-          </button>
+
+          <Link to="/about" className="px-8 py-4 rounded-full border border-white/20 hover:bg-white/5 transition-all text-white font-medium backdrop-blur-sm">
+            EXPLORE ECOSYSTEM
+          </Link>
         </div>
       </div>
-    </section>
+
+      {/* Decorative Elements */}
+      <div className="absolute bottom-10 left-10 hidden md:block animate-bounce">
+        <div className="text-xs text-gray-500 tracking-[0.2em]">SCROLL TO DISCOVER</div>
+      </div>
+    </div>
   );
-};
+}
