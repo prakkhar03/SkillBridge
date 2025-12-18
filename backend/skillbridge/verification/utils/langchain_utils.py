@@ -1,4 +1,4 @@
-from langchain_google_genai import GoogleGenerativeAI
+from langchain_google_genai import GoogleGenerativeAI, ChatGoogleGenerativeAI
 from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import StrOutputParser, JsonOutputParser
 from dotenv import load_dotenv
@@ -7,7 +7,10 @@ load_dotenv()
 API_KEY = os.getenv("GEMINI_API_KEY")
 if not API_KEY:
     raise ValueError("GEMINI_API_KEY or GOOGLE_API_KEY is missing. Set it in your .env file.")
-model = GoogleGenerativeAI(model="gemini-1.5-pro", temperature=0, google_api_key=API_KEY)
+model = ChatGoogleGenerativeAI(
+    model="gemini-2.5-flash",   
+    api_key=API_KEY
+)
 def analyze_resume(resume_text: str) -> str:
     template = PromptTemplate(
         input_variables=["resume_text"],

@@ -302,3 +302,24 @@ class RejectApplicantView(APIView):
         except Exception as e:
             logger.exception(f"Unexpected error in RejectApplicantView: {str(e)}")
             return Response({'error': 'Unexpected error occurred', 'details': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class ListAppliedProjectsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        if request.user.role != "freelancer":
+            return Response(
+                {"error": "Only freelancers can view applied projects."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        projects = FreelanceProject.objects.filter(
+            applicants=request.user
+        ).select_related("client_company", "created_by")
+
+        serializer = FreelanceProjectSerializer(projects, many=True)
+
+        return Response({
+            "count": projects.count(),
+            "results": serializer.data
+        }, status=status.HTTP_200_OK)

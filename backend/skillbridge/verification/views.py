@@ -66,28 +66,36 @@ class AdminVerifyUserView(APIView):
     permission_classes = [IsAdminUser]
 
     def post(self, request, user_id):
-        serializer = AdminVerifySerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+        try:
+            verification = SkillVerification.objects.get(user__id=user_id)
+            profile = verification.user.profile
 
-        target_user = get_object_or_404(User, id=user_id)
-        profile = get_object_or_404(Profile, user=target_user)
-        verification = SkillVerification.objects.filter(user=target_user).order_by('-created_at').first()
+            star_rating = request.data.get("star_rating")
+            verification_tag = request.data.get("verification_tag")
 
-        if not verification:
-            return Response({"error": "No verification found for this user"}, status=status.HTTP_404_NOT_FOUND)
+            if star_rating is None or verification_tag is None:
+                return Response(
+                    {"message": "star_rating and verification_tag are required"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
 
-        profile.star_rating = serializer.validated_data["star_rating"]
-        profile.verification_tag = serializer.validated_data["tags"]
-        profile.save()
+            profile.star_rating = float(star_rating)
+            profile.verification_tag = verification_tag
+            profile.save(update_fields=["star_rating", "verification_tag"])
 
-        verification.verification_status = "VERIFIED"
-        verification.save()
+            verification.verification_status = "VERIFIED"
+            verification.save(update_fields=["verification_status"])
 
-        return Response({
-            "message": f"User {target_user.email} verified successfully",
-            "star_rating": profile.star_rating,
-            "verification_tag": profile.verification_tag
-        })
+            return Response(
+                {"message": "User verified successfully"},
+                status=status.HTTP_200_OK
+            )
+
+        except SkillVerification.DoesNotExist:
+            return Response(
+                {"message": "Verification record not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
 
 
 class UserRecommendationView(APIView):
