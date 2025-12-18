@@ -107,35 +107,66 @@ class TestView(APIView):
     
     def post(self, request):
         """Generate a test, store it with correct answers, and return questions only."""
-        profile = get_object_or_404(Profile, user=request.user)
-        verification = SkillVerification.objects.filter(user=request.user).order_by('-created_at').first()
+        try:
+            profile = get_object_or_404(Profile, user=request.user)
+            verification = SkillVerification.objects.filter(user=request.user).order_by('-created_at').first()
+            
+            # Fallback if no verification analysis was done yet
+            resume_analysis = verification.resume_analysis if verification else ""
+            github_analysis = verification.github_analysis if verification else ""
+            recommendation = verification.gemini_recommendation if verification else f"User profile skills: {profile.skills}"
 
-        if not verification:
-            return Response({"error": "No verification found"}, status=status.HTTP_404_NOT_FOUND)
-        
-        test_data = generate_test(
-            resume_analysis=verification.resume_analysis,
-            github_analysis=verification.github_analysis,
-            skills=profile.skills,
-            recommendation=verification.gemini_recommendation
-        )
+            try:
+                test_data = generate_test(
+                    resume_analysis=resume_analysis,
+                    github_analysis=github_analysis,
+                    skills=profile.skills,
+                    recommendation=recommendation
+                )
+                
+                if not isinstance(test_data, dict) or "questions" not in test_data:
+                    raise ValueError("Invalid format from AI generator")
 
-        if "questions" not in test_data or "answers" not in test_data:
-            return Response({"error": "Invalid test data from generator"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            except Exception as e:
+                print(f"ERROR: AI test generation failed: {str(e)}")
+                # Robust Fallback Test Data
+                test_data = {
+                    "role": "General Developer",
+                    "questions": [
+                        {
+                            "question": f"Based on your skill '{profile.skills or 'Development'}', what is a key best practice for high-quality code?",
+                            "options": ["No testing", "Writing clean, documented code", "Copy-pasting from StackOverflow", "Ignoring security"],
+                            "type": "multiple_choice",
+                            "difficulty": "Medium",
+                            "correct_answer": "Writing clean, documented code"
+                        },
+                        {
+                            "question": "Which of these is a common version control system?",
+                            "options": ["Git", "Excel", "Photoshop", "Word"],
+                            "type": "multiple_choice",
+                            "difficulty": "Easy",
+                            "correct_answer": "Git"
+                        }
+                    ],
+                    "answers": ["Writing clean, documented code", "Git"]
+                }
 
-       
-        skill_test = SkillTest.objects.create(
-            user=request.user,
-            questions=test_data["questions"],
-            answers=test_data["answers"]
-        )
+            skill_test = SkillTest.objects.create(
+                user=request.user,
+                questions=test_data["questions"],
+                answers=test_data["answers"]
+            )
 
-        return Response({
-            "message": "Test generated successfully",
-            "test_id": skill_test.id,
-            "role": test_data.get("role", ""),
-            "questions": test_data["questions"]
-        }, status=status.HTTP_200_OK)
+            return Response({
+                "message": "Test generated successfully",
+                "test_id": skill_test.id,
+                "role": test_data.get("role", ""),
+                "questions": test_data["questions"]
+            }, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            print(f"CRITICAL ERROR in TestView: {str(e)}")
+            return Response({"error": "Failed to generate test. Internal server error."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 

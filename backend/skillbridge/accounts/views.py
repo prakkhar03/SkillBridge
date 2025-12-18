@@ -41,17 +41,15 @@ class RegisterView(APIView):
 
                 existing_user = User.objects.filter(email=email).first()
                 if existing_user:
-                    if not existing_user.verified:
-                        tokens = get_tokens_for_user(existing_user)
-                        # Temporarily commented out due to email configuration issues
-                        # send_verification_email(existing_user, tokens['access'])
-                        return Response({
-                            "message": "User exists but not verified. Email verification temporarily disabled.",
-                            "data": {
-                                "user": UserDataSerializer(existing_user).data,
-                                "tokens": tokens
-                            }
-                        }, status=403)
+                    # Allow login even if not verified
+                    tokens = get_tokens_for_user(existing_user)
+                    return Response({
+                        "message": "User exists. Logging in directly.",
+                        "data": {
+                            "user": UserDataSerializer(existing_user).data,
+                            "tokens": tokens
+                        }
+                    }, status=200)
                     return Response({"message": "Email already registered"}, status=409)
 
                 serializer.is_valid(raise_exception=True)
@@ -109,11 +107,7 @@ class LoginView(APIView):
         try:
             serializer.is_valid(raise_exception=True)
             user = serializer.context['user']
-            if not user.verified:
-                tokens = get_tokens_for_user(user)
-                # Temporarily commented out due to email configuration issues
-                # send_verification_email(user, tokens['access'])
-                return Response({"message": "Email not verified. Email verification temporarily disabled."}, status=403)
+            # Verification check bypassed as per user request
 
             cache.delete(cache_key_attempts)
             cache.delete(cache_key_blocked)

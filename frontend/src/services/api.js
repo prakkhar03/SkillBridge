@@ -15,7 +15,7 @@ export const clearTokens = () => {
 // API request helper
 const apiRequest = async (endpoint, options = {}) => {
   const token = getToken();
-  
+
   const config = {
     headers: {
       'Content-Type': 'application/json',
@@ -28,7 +28,7 @@ const apiRequest = async (endpoint, options = {}) => {
   try {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
     const data = await response.json();
-    
+
     if (!response.ok) {
       // Create a proper error object with the backend message
       const error = new Error(data.message || `HTTP error! status: ${response.status}`);
@@ -36,7 +36,7 @@ const apiRequest = async (endpoint, options = {}) => {
       error.data = data;
       throw error;
     }
-    
+
     return data;
   } catch (error) {
     console.error('API Error:', error);
@@ -129,6 +129,19 @@ export const projectAPI = {
   // Get project applicants (for clients)
   getProjectApplicants: async (projectId) => {
     return apiRequest(`/projects/${projectId}/applicants/`);
+  },
+
+  // Create a new project (for clients)
+  createProject: async (projectData) => {
+    return apiRequest('/projects/create/', {
+      method: 'POST',
+      body: JSON.stringify(projectData),
+    });
+  },
+
+  // Get projects posted by the current client
+  getClientProjects: async () => {
+    return apiRequest('/projects/'); // Backend handles filtering based on role/user
   },
 };
 

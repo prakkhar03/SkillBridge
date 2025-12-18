@@ -27,11 +27,11 @@ class FreelanceProjectCreateView(APIView):
             if request.user.role != "client":
                 return Response({'error': 'Only clients can post projects.'}, status=status.HTTP_403_FORBIDDEN)
 
-            # Ensure client company exists
-            try:
-                client_company = request.user.client_company
-            except ClientCompany.DoesNotExist:
-                return Response({'error': 'Client company profile not found.'}, status=status.HTTP_404_NOT_FOUND)
+            # Ensure client company exists (Auto-create a basic one if missing for ease of use)
+            client_company, _ = ClientCompany.objects.get_or_create(
+                user=request.user,
+                defaults={'company_name': f"{request.user.email.split('@')[0]}'s Company"}
+            )
 
             serializer = FreelanceProjectSerializer(data=request.data, context={'request': request})
             if serializer.is_valid():
@@ -90,9 +90,15 @@ class FreelanceProjectListView(APIView):
 
     def get(self, request):
         try:
-            # Only freelancers should get ranked recommendations
+            # Clients should see THEIR projects (Active or Closed)
+            if request.user.role == "client":
+                projects = FreelanceProject.objects.filter(created_by=request.user).order_by('-created_at')
+                serializer = FreelanceProjectSerializer(projects, many=True)
+                return Response(serializer.data, status=200)
+
+            # Admins or others
             if request.user.role != "freelancer":
-                projects = FreelanceProject.objects.filter(is_open=True)
+                projects = FreelanceProject.objects.filter(is_open=True).order_by('-created_at')
                 serializer = FreelanceProjectSerializer(projects, many=True)
                 return Response(serializer.data, status=200)
 

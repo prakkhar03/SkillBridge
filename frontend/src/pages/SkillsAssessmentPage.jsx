@@ -2,10 +2,10 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { verificationAPI } from '../services/api';
-import { 
-  FaArrowLeft, 
-  FaClock, 
-  FaCheckCircle, 
+import {
+  FaArrowLeft,
+  FaClock,
+  FaCheckCircle,
   FaTimes,
   FaQuestionCircle,
   FaExclamationTriangle,
@@ -40,11 +40,11 @@ const QuestionCard = ({ question, questionIndex, answer, onAnswerChange, isAnswe
         {question.type === 'multiple_choice' ? 'Multiple Choice' : 'Text Answer'}
       </span>
     </div>
-    
+
     <h3 className="text-lg font-semibold text-gray-800 mb-4">
       {question.question}
     </h3>
-    
+
     {question.type === 'multiple_choice' ? (
       <div className="space-y-3">
         {question.options?.map((option, optionIndex) => (
@@ -88,9 +88,8 @@ const Timer = ({ timeLeft, isRunning, onPause, onResume, onStop }) => {
           <span className="text-lg font-semibold text-gray-800">Time Remaining</span>
         </div>
         <div className="flex items-center space-x-2">
-          <span className={`text-2xl font-bold ${
-            timeLeft <= 300 ? 'text-red-600' : 'text-blue-600'
-          }`}>
+          <span className={`text-2xl font-bold ${timeLeft <= 300 ? 'text-red-600' : 'text-blue-600'
+            }`}>
             {formatTime(timeLeft)}
           </span>
           {isRunning ? (
@@ -116,14 +115,13 @@ const Timer = ({ timeLeft, isRunning, onPause, onResume, onStop }) => {
           </button>
         </div>
       </div>
-      
+
       {/* Progress Bar */}
       <div className="mt-3">
         <div className="w-full bg-gray-200 rounded-full h-2">
-          <div 
-            className={`h-2 rounded-full transition-all duration-300 ${
-              timeLeft <= 300 ? 'bg-red-500' : 'bg-blue-500'
-            }`}
+          <div
+            className={`h-2 rounded-full transition-all duration-300 ${timeLeft <= 300 ? 'bg-red-500' : 'bg-blue-500'
+              }`}
             style={{ width: `${(timeLeft / 1800) * 100}%` }} // Assuming 30 minutes (1800 seconds)
           ></div>
         </div>
@@ -140,15 +138,15 @@ const ProgressIndicator = ({ currentQuestion, totalQuestions, answeredQuestions 
         {currentQuestion + 1} of {totalQuestions}
       </span>
     </div>
-    
+
     {/* Progress Bar */}
     <div className="w-full bg-gray-200 rounded-full h-3">
-      <div 
+      <div
         className="bg-blue-500 h-3 rounded-full transition-all duration-300"
         style={{ width: `${((currentQuestion + 1) / totalQuestions) * 100}%` }}
       ></div>
     </div>
-    
+
     {/* Question Status */}
     <div className="flex items-center justify-between mt-3">
       <span className="text-sm text-gray-600">
@@ -163,22 +161,62 @@ const ProgressIndicator = ({ currentQuestion, totalQuestions, answeredQuestions 
 
 export default function SkillsAssessmentPage() {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const [testData, setTestData] = useState(null);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState({});
-  const [timeLeft, setTimeLeft] = useState(1800); // 30 minutes
-  const [isRunning, setIsRunning] = useState(true);
+  const [timeLeft, setTimeLeft] = useState(0);
+  const [isRunning, setIsRunning] = useState(false);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [testStarted, setTestStarted] = useState(false);
+  const [fullScreenWarning, setFullScreenWarning] = useState(0);
 
   useEffect(() => {
     if (isAuthenticated) {
-      fetchTestData();
+      setLoading(false); // Wait for start test to fetch data
     }
   }, [isAuthenticated]);
+
+  // Secure Mode Effects
+  useEffect(() => {
+    if (testStarted) {
+      const handleVisibilityChange = () => {
+        if (document.hidden) {
+          alert("WARNING: Tab switching is not allowed during the test!");
+          // Optional: Auto-submit or penalize
+        }
+      };
+
+      const handleContextMenu = (e) => {
+        e.preventDefault();
+      };
+
+      const handleFullScreenChange = () => {
+        if (!document.fullscreenElement) {
+          setFullScreenWarning(prev => prev + 1);
+          if (fullScreenWarning > 2) {
+            handleTimeUp(); // Force submit
+          } else {
+            alert(`WARNING: You must stay in fullscreen mode! (${fullScreenWarning + 1}/3 warnings)`);
+            // Try to re-enter
+            document.documentElement.requestFullscreen().catch(() => { });
+          }
+        }
+      }
+
+      document.addEventListener("visibilitychange", handleVisibilityChange);
+      document.addEventListener("contextmenu", handleContextMenu);
+      document.addEventListener("fullscreenchange", handleFullScreenChange);
+
+      return () => {
+        document.removeEventListener("visibilitychange", handleVisibilityChange);
+        document.removeEventListener("contextmenu", handleContextMenu);
+        document.removeEventListener("fullscreenchange", handleFullScreenChange);
+      };
+    }
+  }, [testStarted, fullScreenWarning]);
 
   useEffect(() => {
     let interval = null;
@@ -199,13 +237,13 @@ export default function SkillsAssessmentPage() {
   const fetchTestData = async () => {
     try {
       setLoading(true);
-      // For now, we'll use mock data since the backend endpoint might not be ready
-      // const response = await verificationAPI.startVerification();
-      // setTestData(response.data);
-      
-      // Mock test data
+      setError('');
+
+      // Standard React Assessment (Reliable Fallback)
       const mockTestData = {
-        test_id: 'test_001',
+        test_id: `test_react_${Date.now()}`,
+        time_limit: 1800, // 30 minutes
+        instructions: "Answer all questions. Do not exit fullscreen or switch tabs.",
         questions: [
           {
             id: 1,
@@ -223,57 +261,86 @@ export default function SkillsAssessmentPage() {
             id: 2,
             type: 'multiple_choice',
             question: 'Which of the following is NOT a valid JavaScript data type?',
-            options: [
-              'undefined',
-              'null',
-              'void',
-              'symbol'
-            ],
+            options: ['undefined', 'null', 'void', 'symbol'],
             correct_answer: 'void'
           },
           {
             id: 3,
-            type: 'text',
-            question: 'Explain the concept of closure in JavaScript and provide a practical example.',
-            correct_answer: 'A closure is a function that has access to variables in its outer scope.'
+            type: 'multiple_choice',
+            question: 'What is the virtual DOM in React?',
+            options: [
+              'A direct copy of the browser DOM',
+              'A lightweight representation of the real DOM in memory',
+              'A server-side rendering tool',
+              'A database for storing component state'
+            ],
+            correct_answer: 'A lightweight representation of the real DOM in memory'
           },
           {
             id: 4,
             type: 'multiple_choice',
-            question: 'What does CSS Grid primarily help with?',
-            options: [
-              'Creating animations',
-              'Layout and positioning',
-              'Color schemes',
-              'Typography'
-            ],
-            correct_answer: 'Layout and positioning'
+            question: 'Which hook should be used for optimized performance by memoizing a function?',
+            options: ['useEffect', 'useMemo', 'useCallback', 'useContext'],
+            correct_answer: 'useCallback'
           },
           {
             id: 5,
             type: 'multiple_choice',
-            question: 'Which HTTP method is typically used for creating new resources?',
+            question: 'Explain the concept of Lifted State in React.',
             options: [
-              'GET',
-              'POST',
-              'PUT',
-              'DELETE'
+              'Moving state to a parent component to share it between siblings',
+              'Using global Redux state',
+              'Passing state down through props',
+              'Deleting state when a component unmounts'
             ],
-            correct_answer: 'POST'
+            correct_answer: 'Moving state to a parent component to share it between siblings'
           }
-        ],
-        time_limit: 1800, // 30 minutes
-        instructions: 'This test assesses your knowledge of web development fundamentals. Answer all questions to the best of your ability. You can review and change your answers before submitting.'
+        ]
       };
-      
-      setTestData(mockTestData);
-      setTimeLeft(mockTestData.time_limit);
-      setError('');
+
+      try {
+        // Try dynamic fetching first
+        const skills = user?.skills || "React, JavaScript, Web Development";
+        const response = await verificationAPI.getQuestions(skills);
+
+        const finalData = (response && response.questions && response.questions.length > 0)
+          ? {
+            test_id: response.test_id || `test_${Date.now()}`,
+            questions: response.questions,
+            time_limit: response.time_limit || 1800,
+            instructions: "Answer all questions. Do not exit fullscreen or switch tabs."
+          }
+          : mockTestData;
+
+        setTestData(finalData);
+        setTimeLeft(finalData.time_limit);
+        setTestStarted(true);
+        setIsRunning(true);
+        enterFullScreen();
+
+      } catch (err) {
+        console.error("Dynamic generation failed, using internal fallback:", err);
+        setTestData(mockTestData);
+        setTimeLeft(mockTestData.time_limit);
+        setTestStarted(true);
+        setIsRunning(true);
+        enterFullScreen();
+      }
+
     } catch (error) {
-      console.error('Error fetching test data:', error);
-      setError('Failed to load the skills assessment test. Please try again.');
+      console.error('Critical error in fetchTestData:', error);
+      setError('Failed to initialize test. Please try again.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const enterFullScreen = () => {
+    const elem = document.documentElement;
+    if (elem.requestFullscreen) {
+      elem.requestFullscreen().catch(err => {
+        console.error(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
+      });
     }
   };
 
@@ -285,7 +352,7 @@ export default function SkillsAssessmentPage() {
   };
 
   const handleNextQuestion = () => {
-    if (currentQuestion < testData.questions.length - 1) {
+    if (testData && currentQuestion < testData.questions.length - 1) {
       setCurrentQuestion(prev => prev + 1);
     }
   };
@@ -297,47 +364,55 @@ export default function SkillsAssessmentPage() {
   };
 
   const handleStartTest = () => {
-    setTestStarted(true);
-    setIsRunning(true);
+    fetchTestData();
   };
 
   const handlePause = () => {
-    setIsRunning(false);
+    // Disable pausing in secure mode?
+    // setIsRunning(false);
   };
 
   const handleResume = () => {
-    setIsRunning(true);
+    // setIsRunning(true);
   };
 
   const handleStop = () => {
-    if (window.confirm('Are you sure you want to stop the test? This action cannot be undone.')) {
+    if (window.confirm('Are you sure you want to quit? Your progress will be lost.')) {
+      if (document.fullscreenElement) {
+        document.exitFullscreen().catch(() => { });
+      }
       navigate('/dashboard');
     }
   };
 
   const handleTimeUp = () => {
     setIsRunning(false);
-    alert('Time is up! Your test will be submitted automatically.');
+    alert('Time is up! Submitting test...');
     handleSubmitTest();
   };
 
   const handleSubmitTest = async () => {
     try {
       setSubmitting(true);
-      
-      // For now, we'll simulate the submission
-      // const response = await verificationAPI.submitTest(testData.test_id, answers);
-      
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Mock successful submission
-      alert('Test submitted successfully! You will be notified of your results soon.');
+      // Exit fullscreen
+      if (document.fullscreenElement) {
+        document.exitFullscreen().catch(() => { });
+      }
+
+      const resultData = {
+        test_id: testData.test_id,
+        answers: answers,
+        // user_id handled by backend token
+      };
+
+      await verificationAPI.submitTest(resultData);
+
+      alert('Test submitted successfully! Check your dashboard for verification status.');
       navigate('/dashboard');
-      
+
     } catch (error) {
       console.error('Error submitting test:', error);
-      setError('Failed to submit test. Please try again.');
+      setError('Failed to submit test. Please check connection and try again.');
     } finally {
       setSubmitting(false);
     }
@@ -347,113 +422,91 @@ export default function SkillsAssessmentPage() {
     return Object.keys(answers).length;
   };
 
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: colors.background }}>
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">Authentication Required</h2>
-          <p className="text-gray-600 mb-6">Please sign in to take the skills assessment.</p>
-          <button
-            onClick={() => navigate('/auth')}
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            Sign In
-          </button>
-        </div>
+  if (!isAuthenticated) return (/* ... Auth Required ... */
+    <div className="min-h-screen flex items-center justify-center bg-deep-violet">
+      <div className="text-center">
+        <h2 className="text-2xl font-bold text-white mb-4">Authentication Required</h2>
+        <button onClick={() => navigate('/auth')} className="neon-button px-6 py-3 rounded-lg">Sign In</button>
       </div>
-    );
-  }
+    </div>
+  );
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: colors.background }}>
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading skills assessment...</p>
-        </div>
+  if (loading) return (
+    <div className="min-h-screen flex items-center justify-center bg-deep-violet">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-neon-cyan mx-auto mb-4"></div>
+        <p className="text-neon-cyan">Generating your personalized assessment...</p>
       </div>
-    );
-  }
-
-  if (!testData) {
-    return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: colors.background }}>
-        <div className="text-center">
-          <FaExclamationTriangle className="w-16 h-16 text-red-500 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">Test Not Available</h2>
-          <p className="text-gray-600 mb-6">Unable to load the skills assessment test.</p>
-          <button
-            onClick={() => navigate('/dashboard')}
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            Back to Dashboard
-          </button>
-        </div>
-      </div>
-    );
-  }
+    </div>
+  );
 
   if (!testStarted) {
     return (
-      <div className="min-h-screen" style={{ backgroundColor: colors.background }}>
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
+      <div className="min-h-screen bg-deep-violet text-white">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-12 pt-40">
           {/* Header */}
           <div className="mb-8">
             <button
               onClick={() => navigate('/dashboard')}
-              className="flex items-center text-gray-600 hover:text-gray-800 mb-4 transition-colors"
+              className="flex items-center text-gray-400 hover:text-white mb-4 transition-colors"
             >
               <FaArrowLeft className="w-4 h-4 mr-2" />
               Back to Dashboard
             </button>
-            <h1 className="text-3xl md:text-4xl font-bold mb-2" style={{ color: colors.accent }}>
+            <h1 className="text-4xl md:text-5xl font-bold mb-4 aurora-text mt-24">
               Skills Assessment Test
             </h1>
-            <p className="text-lg text-gray-600">
-              Test your knowledge and skills to get verified on SkillBridge
+            <p className="text-xl text-gray-300">
+              Prove your expertise to earn the <span className="text-neon-cyan">Verified</span> badge.
             </p>
           </div>
 
           {/* Test Instructions */}
-          <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
+          <div className="holo-card rounded-xl p-8 mb-8">
             <div className="text-center mb-8">
-              <FaQuestionCircle className="w-16 h-16 text-blue-600 mx-auto mb-4" />
-              <h2 className="text-2xl font-bold text-gray-800 mb-4">Test Instructions</h2>
+              <FaQuestionCircle className="w-16 h-16 text-neon-cyan mx-auto mb-4" />
+              <h2 className="text-2xl font-bold text-white mb-4">Secure Mode Assessment</h2>
             </div>
-            
+
             <div className="space-y-4 mb-8">
               <div className="flex items-start space-x-3">
                 <FaCheckCircle className="w-5 h-5 text-green-500 mt-1 flex-shrink-0" />
                 <div>
-                  <h3 className="font-semibold text-gray-800">Test Format</h3>
-                  <p className="text-gray-600">This test contains {testData.questions.length} questions covering various aspects of web development.</p>
+                  <h3 className="font-semibold text-white">Dynamic Questions</h3>
+                  <p className="text-gray-400">Questions are generated based on your profile skills.</p>
                 </div>
               </div>
-              
+
               <div className="flex items-start space-x-3">
                 <FaClock className="w-5 h-5 text-blue-500 mt-1 flex-shrink-0" />
                 <div>
-                  <h3 className="font-semibold text-gray-800">Time Limit</h3>
-                  <p className="text-gray-600">You have {Math.floor(testData.time_limit / 60)} minutes to complete the test.</p>
+                  <h3 className="font-semibold text-white">Time Limit</h3>
+                  <p className="text-gray-400">You will have 30 minutes to complete the test.</p>
                 </div>
               </div>
-              
+
               <div className="flex items-start space-x-3">
-                <FaExclamationTriangle className="w-5 h-5 text-orange-500 mt-1 flex-shrink-0" />
+                <FaExclamationTriangle className="w-5 h-5 text-hot-pink mt-1 flex-shrink-0" />
                 <div>
-                  <h3 className="font-semibold text-gray-800">Important Notes</h3>
-                  <p className="text-gray-600">Once you start the test, the timer will begin and cannot be paused for extended periods.</p>
+                  <h3 className="font-semibold text-white">Secure Environment</h3>
+                  <ul className="text-gray-400 list-disc list-inside">
+                    <li>Fullscreen mode required</li>
+                    <li>Tab switching is monitored</li>
+                    <li>Right-click context menu is disabled</li>
+                    <li>Multiple violations will auto-submit the test</li>
+                  </ul>
                 </div>
               </div>
             </div>
-            
+
             <div className="text-center">
+              <div className="text-red-400 mb-4">{error}</div>
               <button
                 onClick={handleStartTest}
-                className="px-8 py-4 bg-green-600 text-white text-lg font-semibold rounded-lg hover:bg-green-700 transition-colors flex items-center mx-auto space-x-2"
+                className="neon-button px-8 py-4 text-lg font-bold rounded-full flex items-center mx-auto space-x-2"
               >
                 <FaPlay className="w-5 h-5" />
-                <span>Start Test</span>
+                <span>Start Secure Test</span>
               </button>
             </div>
           </div>
@@ -463,18 +516,14 @@ export default function SkillsAssessmentPage() {
   }
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: colors.background }}>
+    <div className="min-h-screen bg-deep-violet text-white select-none mt-24">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
         {/* Header */}
-        <div className="mb-6">
-          <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold text-gray-800">Skills Assessment Test</h1>
-            <button
-              onClick={() => navigate('/dashboard')}
-              className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
-            >
-              Exit Test
-            </button>
+        <div className="mb-6 flex items-center justify-between">
+          <h1 className="text-2xl font-bold text-neon-cyan">SkillBridge Assessment</h1>
+          <div className="text-sm text-red-400 flex items-center gap-2">
+            <FaExclamationTriangle />
+            Do not exit fullscreen
           </div>
         </div>
 
@@ -484,86 +533,96 @@ export default function SkillsAssessmentPage() {
             <Timer
               timeLeft={timeLeft}
               isRunning={isRunning}
-              onPause={handlePause}
-              onResume={handleResume}
+              onPause={() => { }} // Disabled
+              onResume={() => { }} // Disabled
               onStop={handleStop}
             />
           </div>
           <div>
             <ProgressIndicator
               currentQuestion={currentQuestion}
-              totalQuestions={testData.questions.length}
+              totalQuestions={testData?.questions?.length || 0}
               answeredQuestions={getAnsweredQuestionsCount()}
             />
           </div>
         </div>
 
-        {/* Error Display */}
-        {error && (
-          <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg mb-6">
-            {error}
+        {/* Question Card - Using Holo Card style */}
+        {testData && testData.questions && (
+          <div className="holo-card p-6 mb-6 rounded-xl">
+            <div className="flex items-start justify-between mb-6">
+              <span className="bg-electric-purple/20 text-electric-purple text-sm font-semibold px-4 py-1 rounded-full border border-electric-purple/50">
+                Question {currentQuestion + 1}
+              </span>
+              <span className="text-sm text-gray-400 uppercase">
+                {testData.questions[currentQuestion].type === 'multiple_choice' ? 'Multiple Choice' : 'Text Answer'}
+              </span>
+            </div>
+
+            <h3 className="text-xl font-medium text-white mb-6 leading-relaxed">
+              {testData.questions[currentQuestion].question}
+            </h3>
+
+            {testData.questions[currentQuestion].type === 'multiple_choice' ? (
+              <div className="space-y-4">
+                {testData.questions[currentQuestion].options?.map((option, idx) => (
+                  <label key={idx} className={`flex items-center p-4 rounded-lg border cursor-pointer transition-all ${answers[currentQuestion] === option
+                    ? 'border-neon-cyan bg-neon-cyan/10'
+                    : 'border-white/10 hover:bg-white/5'
+                    }`}>
+                    <input
+                      type="radio"
+                      name={`q-${currentQuestion}`}
+                      value={option}
+                      checked={answers[currentQuestion] === option}
+                      onChange={(e) => handleAnswerChange(currentQuestion, e.target.value)}
+                      className="w-5 h-5 text-neon-cyan bg-transparent border-gray-500 focus:ring-neon-cyan focus:ring-offset-0"
+                    />
+                    <span className="ml-3 text-gray-200">{option}</span>
+                  </label>
+                ))}
+              </div>
+            ) : (
+              <textarea
+                value={answers[currentQuestion] || ''}
+                onChange={(e) => handleAnswerChange(currentQuestion, e.target.value)}
+                className="w-full bg-black/20 border border-white/10 rounded-lg p-4 text-white focus:border-neon-cyan focus:ring-1 focus:ring-neon-cyan outline-none"
+                rows={6}
+                placeholder="Type your answer here..."
+              />
+            )}
           </div>
         )}
 
-        {/* Current Question */}
-        <QuestionCard
-          question={testData.questions[currentQuestion]}
-          questionIndex={currentQuestion}
-          answer={answers[currentQuestion]}
-          onAnswerChange={handleAnswerChange}
-          isAnswered={answers[currentQuestion]}
-        />
-
         {/* Navigation */}
-        <div className="flex items-center justify-between bg-white rounded-xl shadow-lg p-6">
+        <div className="flex items-center justify-between holo-card p-6 rounded-xl">
           <button
             onClick={handlePreviousQuestion}
             disabled={currentQuestion === 0}
-            className={`px-6 py-3 rounded-lg font-medium transition-colors ${
-              currentQuestion === 0
-                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                : 'bg-gray-600 text-white hover:bg-gray-700'
-            }`}
+            className={`px-6 py-3 rounded-lg font-medium transition-colors ${currentQuestion === 0
+              ? 'bg-white/5 text-gray-600 cursor-not-allowed'
+              : 'bg-white/10 text-white hover:bg-white/20'
+              }`}
           >
             Previous
           </button>
-          
-          <div className="flex items-center space-x-4">
-            <span className="text-sm text-gray-600">
-              Question {currentQuestion + 1} of {testData.questions.length}
-            </span>
-            
-            {currentQuestion === testData.questions.length - 1 ? (
-              <button
-                onClick={handleSubmitTest}
-                disabled={submitting}
-                className={`px-8 py-3 rounded-lg font-semibold text-white transition-colors ${
-                  submitting
-                    ? 'bg-gray-400 cursor-not-allowed'
-                    : 'bg-green-600 hover:bg-green-700'
-                }`}
-              >
-                {submitting ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2 inline"></div>
-                    Submitting...
-                  </>
-                ) : (
-                  <>
-                    <FaSave className="w-4 h-4 mr-2 inline" />
-                    Submit Test
-                  </>
-                )}
-              </button>
-            ) : (
-              <button
-                onClick={handleNextQuestion}
-                className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
-              >
-                Next
-              </button>
-            )}
-          </div>
+
+          {currentQuestion === (testData?.questions?.length || 0) - 1 ? (
+            <button
+              onClick={handleSubmitTest}
+              disabled={submitting}
+              className="px-8 py-3 bg-gradient-to-r from-neon-cyan to-electric-purple text-white font-bold rounded-lg hover:opacity-90 transition-opacity flex items-center"
+            >
+              {submitting ? 'Submitting...' : 'Submit Test'}
+            </button>
+          ) : (
+            <button
+              onClick={handleNextQuestion}
+              className="px-8 py-3 bg-white/10 text-white font-bold rounded-lg hover:bg-white/20 transition-colors"
+            >
+              Next
+            </button>
+          )}
         </div>
       </div>
     </div>

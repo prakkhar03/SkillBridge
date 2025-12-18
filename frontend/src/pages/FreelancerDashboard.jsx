@@ -17,12 +17,12 @@ import {
 
 const OnboardingStep = ({ step, title, description, isActive, isCompleted }) => (
   <div className={`flex items-start space-x-3 p-4 rounded-lg border transition-all duration-300 ${isActive ? 'border-cyan-500/50 bg-cyan-500/10' :
-      isCompleted ? 'border-green-500/50 bg-green-500/10' :
-        'border-white/10 bg-white/5'
+    isCompleted ? 'border-green-500/50 bg-green-500/10' :
+      'border-white/10 bg-white/5'
     }`}>
     <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center shadow-lg ${isCompleted ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white' :
-        isActive ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white' :
-          'bg-gray-700 text-gray-400'
+      isActive ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white' :
+        'bg-gray-700 text-gray-400'
       }`}>
       {isCompleted ? (
         <FaCheckCircle className="w-4 h-4" />
@@ -32,14 +32,14 @@ const OnboardingStep = ({ step, title, description, isActive, isCompleted }) => 
     </div>
     <div className="flex-1">
       <h3 className={`font-semibold ${isActive ? 'text-cyan-400' :
-          isCompleted ? 'text-green-400' :
-            'text-gray-400'
+        isCompleted ? 'text-green-400' :
+          'text-gray-400'
         }`}>
         {title}
       </h3>
       <p className={`text-xs ${isActive ? 'text-cyan-300/80' :
-          isCompleted ? 'text-green-300/80' :
-            'text-gray-500'
+        isCompleted ? 'text-green-300/80' :
+          'text-gray-500'
         }`}>
         {description}
       </p>
@@ -152,11 +152,11 @@ export default function FreelancerDashboard() {
   );
 
   return (
-    <div className="min-h-screen bg-deep-violet text-white p-4 md:p-8 pt-24">
+    <div className="min-h-screen bg-deep-violet text-white p-4 md:p-8 pt-40">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <ScrollReveal>
-          <div className="mb-12">
+          <div className="mb-12 mt-24">
             <h1 className="text-5xl md:text-6xl font-bold mb-4">
               Welcome back, <span className="aurora-text">{profile?.full_name || user?.email?.split('@')[0]}</span>
             </h1>
