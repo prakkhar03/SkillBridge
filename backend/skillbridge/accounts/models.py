@@ -41,7 +41,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     email = models.EmailField(unique=True)
     role = models.CharField(max_length=20, choices=ROLE_CHOICES)
-    verified = models.BooleanField(default=False)
+    verified = models.BooleanField(default=True)
     onboarding_stage = models.IntegerField(default=0)  # 0=Registered, 1=Verified, 2=Profile, 3=Skills Test Done
 
     is_active = models.BooleanField(default=True)

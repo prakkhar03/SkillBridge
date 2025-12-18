@@ -8,12 +8,15 @@ import {
 import HomePage from "./pages/HomePage";
 import AuthPage from "./pages/AuthPage";
 import FreelancerDashboard from "./pages/FreelancerDashboard";
+import ClientDashboard from "./pages/ClientDashboard";
+import CreateProjectPage from "./pages/CreateProjectPage";
 import ProfileEditPage from "./pages/ProfileEditPage";
 import ProfileViewPage from "./pages/ProfileViewPage";
 import ProjectListingPage from "./pages/ProjectListingPage";
 import AppliedProjectsPage from "./pages/AppliedProjectsPage";
 import SkillsAssessmentPage from "./pages/SkillsAssessmentPage";
 import VerificationDashboardPage from "./pages/VerificationDashboardPage";
+import { useAuth } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { Footer } from "./ui/landingPage/Footer";
 import SmoothScroll from "./ui/utils/SmoothScroll";
@@ -44,7 +47,15 @@ export default function App() {
                   path="/dashboard"
                   element={
                     <ProtectedRoute>
-                      <FreelancerDashboard />
+                      <DashboardSwitcher />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/projects/create"
+                  element={
+                    <ProtectedRoute>
+                      <CreateProjectPage />
                     </ProtectedRoute>
                   }
                 />
@@ -105,3 +116,8 @@ export default function App() {
     </>
   );
 }
+
+const DashboardSwitcher = () => {
+  const { user } = useAuth();
+  return user?.role === "client" ? <ClientDashboard /> : <FreelancerDashboard />;
+};

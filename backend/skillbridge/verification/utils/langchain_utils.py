@@ -7,7 +7,7 @@ load_dotenv()
 API_KEY = os.getenv("GEMINI_API_KEY")
 if not API_KEY:
     raise ValueError("GEMINI_API_KEY or GOOGLE_API_KEY is missing. Set it in your .env file.")
-model = GoogleGenerativeAI(model="gemini-2.5-pro", temperature=0, api_key=API_KEY)
+model = GoogleGenerativeAI(model="gemini-1.5-pro", temperature=0, google_api_key=API_KEY)
 def analyze_resume(resume_text: str) -> str:
     template = PromptTemplate(
         input_variables=["resume_text"],
