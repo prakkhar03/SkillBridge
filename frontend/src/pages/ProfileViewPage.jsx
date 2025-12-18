@@ -2,13 +2,13 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { authAPI } from '../services/api';
-import { 
-  FaUser, 
-  FaMapMarkerAlt, 
-  FaBriefcase, 
-  FaCode, 
-  FaLink, 
-  FaGithub, 
+import {
+  FaUser,
+  FaMapMarkerAlt,
+  FaBriefcase,
+  FaCode,
+  FaLink,
+  FaGithub,
   FaFileAlt,
   FaEdit,
   FaArrowLeft,
@@ -47,27 +47,27 @@ const SkillTag = ({ skill }) => (
 const VerificationBadge = ({ status, rating }) => {
   const getStatusConfig = (status) => {
     switch (status) {
-      case 'Expert': return { 
-        bg: 'bg-purple-100', 
-        text: 'text-purple-800', 
+      case 'Expert': return {
+        bg: 'bg-purple-100',
+        text: 'text-purple-800',
         border: 'border-purple-300',
         icon: '🏆'
       };
-      case 'Intermediate': return { 
-        bg: 'bg-blue-100', 
-        text: 'text-blue-800', 
+      case 'Intermediate': return {
+        bg: 'bg-blue-100',
+        text: 'text-blue-800',
         border: 'border-blue-300',
         icon: '⭐'
       };
-      case 'Beginner': return { 
-        bg: 'bg-green-100', 
-        text: 'text-green-800', 
+      case 'Beginner': return {
+        bg: 'bg-green-100',
+        text: 'text-green-800',
         border: 'border-green-300',
         icon: '🌱'
       };
-      default: return { 
-        bg: 'bg-gray-100', 
-        text: 'text-gray-800', 
+      default: return {
+        bg: 'bg-gray-100',
+        text: 'text-gray-800',
         border: 'border-gray-300',
         icon: '❓'
       };
@@ -91,6 +91,7 @@ const VerificationBadge = ({ status, rating }) => {
 };
 
 export default function ProfileViewPage() {
+  const { userId } = useParams();
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
   const [loading, setLoading] = useState(true);
@@ -102,16 +103,16 @@ export default function ProfileViewPage() {
       return;
     }
     fetchProfile();
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, navigate, userId]);
 
   const fetchProfile = async () => {
     try {
       setLoading(true);
-      const response = await authAPI.getProfile();
-      if (response.ok) {
-        const profileData = await response.json();
-        setProfile(profileData);
-      }
+      const response = userId
+        ? await authAPI.getProfileById(userId)
+        : await authAPI.getProfile();
+
+      setProfile(response.data || response);
     } catch (error) {
       console.error('Error fetching profile:', error);
     } finally {
@@ -231,8 +232,8 @@ export default function ProfileViewPage() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-500 mb-1">Verification Status</label>
-                <VerificationBadge 
-                  status={profile.verification_tag || 'Unverified'} 
+                <VerificationBadge
+                  status={profile.verification_tag || 'Unverified'}
                   rating={profile.star_rating || 0.0}
                 />
               </div>
@@ -299,7 +300,7 @@ export default function ProfileViewPage() {
                   </button>
                 </div>
               )}
-              
+
               {portfolioLinks.map((link, index) => (
                 <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                   <div className="flex items-center">

@@ -13,6 +13,7 @@ import CreateProjectPage from "./pages/CreateProjectPage";
 import ProfileEditPage from "./pages/ProfileEditPage";
 import ProfileViewPage from "./pages/ProfileViewPage";
 import ProjectListingPage from "./pages/ProjectListingPage";
+import ProjectDetailPage from "./pages/ProjectDetailPage";
 import AppliedProjectsPage from "./pages/AppliedProjectsPage";
 import SkillsAssessmentPage from "./pages/SkillsAssessmentPage";
 import VerificationDashboardPage from "./pages/VerificationDashboardPage";
@@ -68,7 +69,7 @@ export default function App() {
                   }
                 />
                 <Route
-                  path="/profile/view"
+                  path="/profile/:userId?"
                   element={
                     <ProtectedRoute>
                       <ProfileViewPage />
@@ -88,6 +89,14 @@ export default function App() {
                   element={
                     <ProtectedRoute>
                       <AppliedProjectsPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/projects/:projectId"
+                  element={
+                    <ProtectedRoute>
+                      <ProjectDetailPage />
                     </ProtectedRoute>
                   }
                 />
