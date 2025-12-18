@@ -111,63 +111,83 @@ export default function AppliedProjectsPage() {
     }
   }, [isAuthenticated]);
 
-  const fetchAppliedProjects = async () => {
-    try {
-      setLoading(true);
-      // For now, we'll use a mock response since the backend endpoint might not be ready
-      // const response = await projectAPI.getAppliedProjects();
-      // setApplications(response.data || []);
+  // const fetchAppliedProjects = async () => {
+  //   try {
+  //     setLoading(true);
+  //     // For now, we'll use a mock response since the backend endpoint might not be ready
+  //     // const response = await projectAPI.getAppliedProjects();
+  //     // setApplications(response.data || []);
       
-      // Mock data for demonstration
-      const mockApplications = [
-        {
-          id: 1,
-          status: 'pending',
-          applied_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
-          project: {
-            id: '1',
-            title: 'React E-commerce Website',
-            budget: 2500,
-            project_type: 'fixed',
-            client_company: { company_name: 'TechCorp Inc.' }
-          }
-        },
-        {
-          id: 2,
-          status: 'accepted',
-          applied_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), // 5 days ago
-          project: {
-            id: '2',
-            title: 'Python Data Analysis Tool',
-            budget: 45,
-            project_type: 'hourly',
-            client_company: { company_name: 'DataFlow Solutions' }
-          }
-        },
-        {
-          id: 3,
-          status: 'rejected',
-          applied_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // 7 days ago
-          project: {
-            id: '3',
-            title: 'Mobile App UI Design',
-            budget: 1800,
-            project_type: 'fixed',
-            client_company: { company_name: 'MobileFirst Studios' }
-          }
-        }
-      ];
+  //     // Mock data for demonstration
+  //     const mockApplications = [
+  //       {
+  //         id: 1,
+  //         status: 'pending',
+  //         applied_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
+  //         project: {
+  //           id: '1',
+  //           title: 'React E-commerce Website',
+  //           budget: 2500,
+  //           project_type: 'fixed',
+  //           client_company: { company_name: 'TechCorp Inc.' }
+  //         }
+  //       },
+  //       {
+  //         id: 2,
+  //         status: 'accepted',
+  //         applied_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), // 5 days ago
+  //         project: {
+  //           id: '2',
+  //           title: 'Python Data Analysis Tool',
+  //           budget: 45,
+  //           project_type: 'hourly',
+  //           client_company: { company_name: 'DataFlow Solutions' }
+  //         }
+  //       },
+  //       {
+  //         id: 3,
+  //         status: 'rejected',
+  //         applied_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // 7 days ago
+  //         project: {
+  //           id: '3',
+  //           title: 'Mobile App UI Design',
+  //           budget: 1800,
+  //           project_type: 'fixed',
+  //           client_company: { company_name: 'MobileFirst Studios' }
+  //         }
+  //       }
+  //     ];
       
-      setApplications(mockApplications);
-      setError('');
-    } catch (error) {
-      console.error('Error fetching applied projects:', error);
-      setError('Failed to load your applications. Please try again.');
-      setApplications([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+  //     setApplications(mockApplications);
+  //     setError('');
+  //   } catch (error) {
+  //     console.error('Error fetching applied projects:', error);
+  //     setError('Failed to load your applications. Please try again.');
+  //     setApplications([]);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+const fetchAppliedProjects = async () => {
+  try {
+    setLoading(true);
+
+    const response = await projectAPI.getAppliedProjects();
+
+    
+    setApplications(response.results || []);
+
+    setError('');
+  } catch (error) {
+    console.error('Error fetching applied projects:', error);
+    setError('Failed to load your applications. Please try again.');
+    setApplications([]);
+  } finally {
+    setLoading(false);
+  }
+};
+
+
 
   if (!isAuthenticated) {
     return (
@@ -207,7 +227,7 @@ export default function AppliedProjectsPage() {
         </div>
 
         {/* Stats Summary */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        {/* <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
           <div className="bg-white rounded-xl shadow-lg p-6 text-center">
             <div className="text-2xl font-bold text-blue-600 mb-2">{applications.length}</div>
             <div className="text-gray-600">Total Applications</div>
@@ -230,7 +250,7 @@ export default function AppliedProjectsPage() {
             </div>
             <div className="text-gray-600">Not Selected</div>
           </div>
-        </div>
+        </div> */}
 
         {/* Applications List */}
         {loading ? (

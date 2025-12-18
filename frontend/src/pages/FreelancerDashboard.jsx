@@ -44,6 +44,35 @@ const parseGeminiJSON = (raw) => {
     return null;
   }
 };
+const getProfileSteps = (profile, user, isEmailVerified) => {
+  return [
+    {
+      title: "Account Created",
+      description: "Your account has been successfully registered",
+      completed: !!user,
+    },
+    {
+      title: "Email Verified",
+      description: "Verify your email address to continue",
+      completed: isEmailVerified === true, 
+    },
+    {
+      title: "Profile Completed",
+      description: "Fill out your professional profile",
+      completed:
+        !!profile?.full_name &&
+        !!profile?.bio &&
+        !!profile?.skills &&
+        !!profile?.experience_level &&
+        !!profile?.location,
+    },
+    {
+      title: "Skills Assessment",
+      description: "Complete skills verification test",
+      completed: profile?.verification_tag !== "Unverified",
+    },
+  ];
+};
 
 
 const OnboardingStep = ({ step, title, description, isActive, isCompleted }) => (
@@ -122,8 +151,16 @@ export default function FreelancerDashboard() {
   const [onboardingStage, setOnboardingStage] = useState(0);
   const [geminiRec, setGeminiRec] = useState(null);
   const [recLoading, setRecLoading] = useState(true);
+  const [isEmailVerified, setIsEmailVerified] = useState(false);
 
 
+
+const steps = getProfileSteps(profile, user, isEmailVerified);
+
+const completedSteps = steps.filter(step => step.completed).length;
+const progressPercentage = Math.round(
+  (completedSteps / steps.length) * 100
+);
 
 
 
@@ -144,8 +181,10 @@ export default function FreelancerDashboard() {
 const fetchProfile = async () => {
   try {
     const response = await authAPI.getProfile();
-    setProfile(response.data.profile);
-    setOnboardingStage(response.data.onboarding_stage || 0);
+    const userData = response.data;
+    setProfile(userData.profile);
+    setOnboardingStage(userData.onboarding_stage || 0);
+    setIsEmailVerified(userData.verified === true);
 
   } catch (error) {
     console.error("Failed to fetch profile", error);
@@ -183,15 +222,15 @@ useEffect(() => {
 }, [isAuthenticated]);
 
 
-  const steps = [
-    { step: 1, title: "Account Created", description: "Your account has been successfully registered", status: "completed" },
-    { step: 2, title: "Email Verified", description: "Verify your email address to continue", status: onboardingStage >= 1 ? "completed" : "pending" },
-    { step: 3, title: "Profile Completed", description: "Fill out your professional profile", status: onboardingStage >= 2 ? "completed" : "pending" },
-    { step: 4, title: "Skills Assessment", description: "Complete skills verification test", status: onboardingStage >= 3 ? "completed" : "pending" }
-  ];
+  // const steps = [
+  //   { step: 1, title: "Account Created", description: "Your account has been successfully registered", status: "completed" },
+  //   { step: 2, title: "Email Verified", description: "Verify your email address to continue", status: onboardingStage >= 1 ? "completed" : "pending" },
+  //   { step: 3, title: "Profile Completed", description: "Fill out your professional profile", status: onboardingStage >= 2 ? "completed" : "pending" },
+  //   { step: 4, title: "Skills Assessment", description: "Complete skills verification test", status: onboardingStage >= 3 ? "completed" : "pending" }
+  // ];
 
-  const currentStep = steps.findIndex(step => step.status === "pending") + 1;
-  const progressPercentage = 100;
+  // const currentStep = steps.findIndex(step => step.status === "pending") + 1;
+  // const progressPercentage = 100;
 
   if (!isAuthenticated) return (
     <div className="min-h-screen flex items-center justify-center bg-deep-violet">
@@ -245,7 +284,7 @@ useEffect(() => {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {steps.map((step, index) => (
                 <OnboardingStep
                   key={step.step}
@@ -256,7 +295,20 @@ useEffect(() => {
                   isCompleted={step.status === "completed"}
                 />
               ))}
-            </div>
+            </div> */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {steps.map((step, index) => (
+              <OnboardingStep
+                key={index}               
+                step={index + 1}           
+                title={step.title}
+                description={step.description}
+                isActive={!step.completed} 
+                isCompleted={step.completed} 
+              />
+            ))}
+          </div>
+
           </div>
         </ScrollReveal>
 

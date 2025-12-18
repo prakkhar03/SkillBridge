@@ -143,9 +143,6 @@ export const projectAPI = {
     });
   },
 
-  getAppliedProjects: async () => {
-    return apiRequest('/projects/applied/');
-  },
 
   getProjectApplicants: async (projectId) => {
     return apiRequest(`/projects/${projectId}/applicants/`);
@@ -160,6 +157,9 @@ export const projectAPI = {
 
   getClientProjects: async () => {
     return apiRequest('/projects/');
+  },
+  getAppliedProjects: async () => {
+    return apiRequest('/projects/applied/');
   },
 };
 
