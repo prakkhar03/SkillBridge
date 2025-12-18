@@ -82,31 +82,60 @@ export default function ProfileEditPage() {
     fetchProfile();
   }, [isAuthenticated, navigate]);
 
+  // const fetchProfile = async () => {
+  //   try {
+  //     setLoading(true);
+  //     const response = await authAPI.getProfile();
+  //     if (response.ok) {
+  //       const profileData = await response.json();
+  //       setFormData({
+  //         full_name: profileData.full_name || '',
+  //         location: profileData.location || '',
+  //         bio: profileData.bio || '',
+  //         skills: profileData.skills || '',
+  //         experience_level: profileData.experience_level || '',
+  //         portfolio_links: profileData.portfolio_links || '',
+  //         github_url: profileData.github_url || '',
+  //         verification_tag: profileData.verification_tag || 'Unverified',
+  //         star_rating: profileData.star_rating || 0.0
+  //       });
+  //     }
+  //   } catch (error) {
+  //     console.error('Error fetching profile:', error);
+  //     setMessage({ type: 'error', text: 'Failed to load profile data' });
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
   const fetchProfile = async () => {
-    try {
-      setLoading(true);
-      const response = await authAPI.getProfile();
-      if (response.ok) {
-        const profileData = await response.json();
-        setFormData({
-          full_name: profileData.full_name || '',
-          location: profileData.location || '',
-          bio: profileData.bio || '',
-          skills: profileData.skills || '',
-          experience_level: profileData.experience_level || '',
-          portfolio_links: profileData.portfolio_links || '',
-          github_url: profileData.github_url || '',
-          verification_tag: profileData.verification_tag || 'Unverified',
-          star_rating: profileData.star_rating || 0.0
-        });
-      }
-    } catch (error) {
-      console.error('Error fetching profile:', error);
-      setMessage({ type: 'error', text: 'Failed to load profile data' });
-    } finally {
-      setLoading(false);
-    }
-  };
+  try {
+    setLoading(true);
+
+    const response = await authAPI.getProfile();
+
+    
+    const profile = response.data.profile;
+
+    setFormData({
+      full_name: profile.full_name || '',
+      location: profile.location || '',
+      bio: profile.bio || '',
+      skills: profile.skills || '',
+      experience_level: profile.experience_level || '',
+      portfolio_links: profile.portfolio_links || '',
+      github_url: profile.github_url || '',
+      verification_tag: profile.verification_tag || 'Unverified',
+      star_rating: profile.star_rating || 0.0
+    });
+
+  } catch (error) {
+    console.error('Error fetching profile:', error);
+    setMessage({ type: 'error', text: 'Failed to load profile data' });
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({
@@ -142,14 +171,29 @@ export default function ProfileEditPage() {
         submitData.append('resume', resumeFile);
       }
 
-      const response = await authAPI.updateProfile(submitData);
+      // const response = await authAPI.updateProfile(submitData);
       
-      if (response.ok) {
+      // if (response.ok) {
+      //   setMessage({ type: 'success', text: 'Profile updated successfully!' });
+      //   setTimeout(() => {
+      //     navigate('/dashboard');
+      //   }, 2000);
+      const response = await authAPI.updateProfile(submitData);
+
+      if (response.message === "Profile updated successfully") {
         setMessage({ type: 'success', text: 'Profile updated successfully!' });
+
+        setFormData(prev => ({
+          ...prev,
+          ...response.data
+        }));
+
         setTimeout(() => {
           navigate('/dashboard');
-        }, 2000);
-      } else {
+        }, 1500);
+      }
+
+      else {
         const errorData = await response.json();
         setMessage({ type: 'error', text: errorData.message || 'Failed to update profile' });
       }
