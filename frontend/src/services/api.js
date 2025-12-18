@@ -97,6 +97,11 @@ export const authAPI = {
       body: JSON.stringify(profileData),
     });
   },
+
+  // Get profile by ID
+  getProfileById: async (userId) => {
+    return apiRequest(`/accounts/profile/${userId}/`);
+  },
 };
 
 // Project API calls

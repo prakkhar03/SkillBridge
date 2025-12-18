@@ -199,8 +199,9 @@ class ApplicantDetails(APIView):
                 return Response({'error': 'Permission denied.'}, status=status.HTTP_403_FORBIDDEN)
 
             applicants = project.applicants.all()
-            applicant_data = [{'id': applicant.id, 'email': applicant.email} for applicant in applicants]
-            return Response(applicant_data, status=status.HTTP_200_OK)
+            from .serializer import DetailedApplicantSerializer
+            serializer = DetailedApplicantSerializer(applicants, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
 
         except FreelanceProject.DoesNotExist:
             return Response({'error': 'Project not found.'}, status=status.HTTP_404_NOT_FOUND)
