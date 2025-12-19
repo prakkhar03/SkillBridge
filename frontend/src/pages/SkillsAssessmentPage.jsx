@@ -88,7 +88,14 @@ export default function SkillsAssessmentPage() {
   const fetchTestData = async () => {
     try {
       setLoading(true);
-      const res = await verificationAPI.startVerification();
+      const res = await verificationAPI.generateTest();
+
+      setTestData({
+        test_id: res.test_id,
+        questions: res.questions,
+        time_limit: 1800,
+      });
+
 
       setTestData({
         test_id: res.test_id,
@@ -128,23 +135,30 @@ export default function SkillsAssessmentPage() {
   };
 
   const handleSubmitTest = async () => {
-    try {
-      setSubmitting(true);
-      if (document.fullscreenElement) document.exitFullscreen();
+  try {
+    setSubmitting(true);
 
-      await verificationAPI.submitTest(
-        testData.test_id,
-        { answers }
-      );
-
-      alert("Test submitted successfully");
-      navigate('/dashboard');
-    } catch {
-      setError("Submission failed");
-    } finally {
-      setSubmitting(false);
+    if (document.fullscreenElement) {
+      document.exitFullscreen().catch(() => {});
     }
-  };
+
+    const payload = {
+      answers: answers.filter(Boolean) 
+    };
+
+    await verificationAPI.submitTest(testData.test_id, payload.answers);
+
+    alert("Test submitted successfully");
+    navigate("/dashboard");
+
+  } catch (err) {
+    console.error(err);
+    setError("Submission failed");
+  } finally {
+    setSubmitting(false);
+  }
+};
+
 
   const answeredCount = answers.filter(Boolean).length;
 

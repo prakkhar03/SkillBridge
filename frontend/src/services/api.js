@@ -165,29 +165,22 @@ export const projectAPI = {
 
 
 export const verificationAPI = {
-  getVerificationStatus: async () => {
-    return apiRequest('/verification/status/');
-  },
+  startVerification: () =>
+    apiRequest("/verification/start/", { method: "POST" }),
 
-  startVerification: async () => {
-    return apiRequest('/verification/start/', { method: 'POST' });
-  },
+  generateTest: () =>
+    apiRequest("/verification/test/", { method: "POST" }),
 
-  submitTest: async (testId, answers) => {
-    return apiRequest(`/verification/test/${testId}/submit/`, {
-      method: 'POST',
+  submitTest: (testId, answers) =>
+    apiRequest(`/verification/test/${testId}/submit/`, {
+      method: "POST",
       body: JSON.stringify({ answers }),
-    });
-  },
+    }),
 
-  getVerificationHistory: async () => {
-    return apiRequest('/verification/history/');
-  },
-
-  getRecommendation: async () => {
-    return apiRequest('/verification/recommendation/');
-  },
+  getRecommendation: () =>
+    apiRequest("/verification/recommendation/"),
 };
+
 
 
 export default authAPI;
