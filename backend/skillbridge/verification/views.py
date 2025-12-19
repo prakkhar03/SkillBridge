@@ -231,3 +231,13 @@ class SubmitTestView(APIView):
             "percentage": percentage,
             "result": result
         }, status=status.HTTP_200_OK)
+class VerificationStatusView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        verification = SkillVerification.objects.filter(user=request.user).first()
+        if not verification:
+            return Response({"status": "Not Started"})
+
+        serializer = VerificationStatusSerializer(verification)
+        return Response(serializer.data)
